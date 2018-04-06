@@ -16,6 +16,7 @@ public:
 
 
 	void renderObject(std::vector<glm::vec3>& posList, GLenum type = GL_TRIANGLES);
+	void renderObject(std::vector<glm::vec3>& posList, std::vector<glm::vec3>& normalList, std::vector<GLuint>& indexList);
 
 	void render();
 	bool isOpen();
@@ -26,12 +27,13 @@ private:
 	static void doInit();
 	static bool doneInit;
 
+	void handleKeyState(GLFWwindow* window, int key, int scancode, int action, int mods);
 	void handleMoveMouse(GLFWwindow* window, double x, double y);
 	void handleMouseState(GLFWwindow* window, int button, int action, int mods);
 	float mouseX, mouseY;
 	bool mouseIsDown;
 
-
+	glm::vec3 cameraPosition;
 
 	GLuint vao;
 	std::vector<GLuint> renderBuffers;
@@ -39,5 +41,6 @@ private:
 
 	GLFWwindow* window;
 	Shader* standardShader;
+	Shader* meshShader;
 };
 

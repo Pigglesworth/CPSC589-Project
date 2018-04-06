@@ -2,6 +2,7 @@
 
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <random>
 
 LineInput::LineInput()
 	: drawing(false)
@@ -21,6 +22,8 @@ void LineInput::update(float x, float y, bool isDown)
 		{
 			lines.clear();
 			surface.clear();
+			surfaceIndices.clear();
+			volumePoints.clear();
 		}
 
 		lines.emplace_back();
@@ -56,51 +59,119 @@ std::vector<glm::vec3>& LineInput::getSurface()
 	return surface;
 }
 
+std::vector<glm::vec3>& LineInput::getSurfaceNormals()
+{
+	return surfaceNormal;
+}
+
+std::vector<GLuint>& LineInput::getSurfaceIndices()
+{
+	return surfaceIndices;
+}
+
+std::vector<glm::vec3>& LineInput::getVolumePoints()
+{
+	return volumePoints;
+}
+
 
 void LineInput::createSurface()
 {
-	std::vector<glm::vec3> midPoint;
+	const size_t steps = 100;
+	const float inc = 1.f / (steps-1);
 
-	const float inc = 0.01f;
-
-	for (float u = 0.f; u <= 1.f; u += inc)
+	for (size_t ui = 0; ui < steps; ui++)
 	{
-		auto v1 = lines[0].parameterize(u);
-		auto v2 = lines[1].parameterize(u);
-		midPoint.emplace_back((v1 + v2)*0.5f);
-	}
-
-	std::vector<glm::vec3> triPoints;
-	for (float u = 0.f; u <= 1.f; u += inc)
-	{
-		auto u1 = lines[0].parameterize(u);
-		auto u2 = lines[1].parameterize(u);
-		auto mid = (u1 + u2)*0.5f;
-
-		float xd = std::abs(glm::dot(glm::vec3(1, 0, 0), glm::normalize(u1 - u2)));
-		float yd = sqrt(1.f - xd * xd);
-
-		for (float v = 0.f; v <= 2 * M_PI; v += inc * M_PI)
+		for (size_t vi = 0; vi < steps; vi++)
 		{
-			float t;
-			if (v < M_PI)
-				t = v / M_PI;
-			else
-				t = 2.f - (v / M_PI);
+			float u = ((float)ui) * inc;
+			float v = ((float)vi) * inc * 2 * M_PI;
 
-			auto v1 = u1 - mid;
-			auto v2 = mid - u2;
+			surface.emplace_back(getVolumePoint(u, v, 1.0f));
+			surfaceNormal.emplace_back(getVolumeNormal(u, v, 1.0f));
+			
+			if (ui + 1 < steps && vi + 1 < steps)
+			{
+				surfaceIndices.emplace_back(ui*steps + vi);
+				surfaceIndices.emplace_back(ui*steps + vi + 1);
+				surfaceIndices.emplace_back((ui + 1)*steps + vi);
 
-			auto p = v1 * (1.f - t) + v2 * t;
-
-			auto px = cos(v) * p.x;
-			auto py = cos(v) * p.y;
-			auto pz = sin(v) * p.x + sin(v) * p.y;
-
-			triPoints.emplace_back(mid.x + px, mid.y + py, mid.z + pz);
+				surfaceIndices.emplace_back(ui*steps + vi + 1);
+				surfaceIndices.emplace_back((ui + 1)*steps + vi + 1);
+				surfaceIndices.emplace_back((ui + 1)*steps + vi);
+			}
 		}
 	}
 
 
-	surface = triPoints;
+	generateVolumePoints(1000);
+}
+
+void LineInput::generateVolumePoints(size_t count)
+{
+	std::default_random_engine generator;
+	std::uniform_real_distribution<float> distribution(0.0, 1.0);
+
+	for (size_t i = 0; i < count; i++)
+	{
+		float u = distribution(generator);
+		float v = distribution(generator) * 2 * M_PI;
+		float w = std::sqrt(distribution(generator));
+
+		volumePoints.emplace_back(getVolumePoint(u, v, w));
+	}
+}
+
+
+glm::vec3 LineInput::getVolumePoint(float u, float v, float w)
+{
+	auto u1 = lines[0].parameterize(u);
+	auto u2 = lines[1].parameterize(u);
+	auto mid = (u1 + u2)*0.5f;
+
+	float t;
+	if (v < M_PI)
+		t = v / M_PI;
+	else
+		t = 2.f - (v / M_PI);
+
+	auto v1 = u1 - mid;
+	auto v2 = mid - u2;
+
+	auto p = v1 * (1.f - t) + v2 * t;
+
+	auto px = cos(v) * p.x;
+	auto py = cos(v) * p.y;
+	auto pz = sin(v) * p.x + sin(v) * p.y;
+
+	return glm::vec3(mid.x + px*w, mid.y + py*w, mid.z + pz*w);
+}
+
+glm::vec3 LineInput::getVolumeNormal(float u, float v, float w)
+{
+	if (w == 0.f)
+		return glm::vec3(0.f, 0.f, 0.f);
+
+	auto u1 = lines[0].parameterize(u);
+	auto u2 = lines[1].parameterize(u);
+	auto mid = (u1 + u2)*0.5f;
+
+	float t;
+	if (v < M_PI)
+		t = v / M_PI;
+	else
+		t = 2.f - (v / M_PI);
+
+	auto v1 = u1 - mid;
+	auto v2 = mid - u2;
+
+	auto p = v1 * (1.f - t) + v2 * t;
+
+	auto px = cos(v) * p.x;
+	auto py = cos(v) * p.y;
+	auto pz = sin(v) * p.x + sin(v) * p.y;
+
+	glm::vec3 point(px, mid.y + py, mid.z + pz);
+
+	return glm::normalize(point-mid);
 }

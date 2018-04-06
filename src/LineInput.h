@@ -4,6 +4,8 @@
 #include <vector>
 #include <algorithm>
 
+#include <gl\glew.h>
+
 struct Line
 {
 	std::vector<glm::vec3> points;
@@ -39,11 +41,23 @@ public:
 
 	std::vector<Line>& getLines();
 	std::vector<glm::vec3>& getSurface();
+	std::vector<glm::vec3>& getSurfaceNormals();
+	std::vector<GLuint>& getSurfaceIndices();
+
+	std::vector<glm::vec3>& getVolumePoints();
+
 private:
 	void createSurface();
+	void generateVolumePoints(size_t count);
+
+	glm::vec3 getVolumePoint(float u, float v, float w);
+	glm::vec3 getVolumeNormal(float u, float v, float w);
 
 	bool drawing;
 	std::vector<Line> lines;
 	std::vector<glm::vec3> surface;
+	std::vector<glm::vec3> surfaceNormal;
+	std::vector<GLuint> surfaceIndices;
+	std::vector<glm::vec3> volumePoints;
 };
 

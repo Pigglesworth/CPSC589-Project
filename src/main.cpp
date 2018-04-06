@@ -41,8 +41,8 @@ int main()
 				window.renderObject(test, GL_LINE_STRIP);
 			}
 
-
-			window.renderObject(lineDrawer.getSurface(), GL_LINE_STRIP);
+			window.renderObject(lineDrawer.getSurface(), lineDrawer.getSurfaceNormals(), lineDrawer.getSurfaceIndices());
+			window.renderObject(lineDrawer.getVolumePoints(), GL_POINTS);
 
 
 		}
