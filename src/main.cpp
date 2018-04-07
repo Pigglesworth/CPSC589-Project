@@ -3,17 +3,13 @@
 
 #include "Window.h"
 #include "LineInput.h"
+#include "SkeletonGenerator.h"
 
 int main()
 {
 	Window window;
 	LineInput lineDrawer;
-
-	std::vector<glm::vec3> tri;
-	tri.emplace_back(0, 0, 0);
-	tri.emplace_back(1, 0, 0);
-	tri.emplace_back(1, 1, 0);
-
+	SkeletonGenerator skeletal;
 
 	while (window.isOpen())
 	{
@@ -24,7 +20,7 @@ int main()
 			auto& lines = lineDrawer.getLines();
 			for (auto& line : lines)
 			{
-				window.renderObject(line.points, GL_LINE_STRIP);
+				window.renderObject(line.points, glm::vec3(1.f,0.f,1.f), GL_LINE_STRIP);
 			}
 
 
@@ -38,12 +34,48 @@ int main()
 					test.emplace_back((v1 + v2)*0.5f);
 				}
 
-				window.renderObject(test, GL_LINE_STRIP);
+				window.renderObject(test, glm::vec3(1.f, 0.f, 1.f), GL_LINE_STRIP);
+
+
+		
+				if (lineDrawer.getVolumePoints().size())
+				{
+
+					if (!skeletal.hasStarted())
+					{
+						glm::vec3 bottom(FLT_MAX);
+						for (auto& point : test)
+						{
+							if (point.y < bottom.y)
+								bottom = point;
+						}
+						bottom.y -= 0.1;
+
+						skeletal.begin(lineDrawer.getVolumePoints(), glm::vec3(bottom));
+					}
+					else
+					{
+						skeletal.step();
+					}
+				}
+				else
+				{
+					skeletal.clear();
+				}
+
+				if (skeletal.isFinished())
+				{
+					window.renderObject(skeletal.getMeshPoints(), skeletal.getMeshNormals(), skeletal.getMeshIndices());
+				}
+				else
+				{
+					window.renderObject(lineDrawer.getSurface(), lineDrawer.getSurfaceNormals(), lineDrawer.getSurfaceIndices());
+					window.renderObject(lineDrawer.getVolumePoints(), glm::vec3(1.f, 0.f, 1.f), GL_POINTS);
+
+					window.renderObject(skeletal.getNodePositions(), skeletal.getNodeIndices(), glm::vec3(0.f, 0.f, 1.f), GL_LINES);
+				}
+
 			}
-
-			window.renderObject(lineDrawer.getSurface(), lineDrawer.getSurfaceNormals(), lineDrawer.getSurfaceIndices());
-			window.renderObject(lineDrawer.getVolumePoints(), GL_POINTS);
-
 
 		}
 

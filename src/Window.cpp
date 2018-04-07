@@ -58,7 +58,8 @@ Window::~Window()
 
 
 
-void Window::renderObject(std::vector<glm::vec3>& posList, GLenum type)
+void Window::renderObject
+	( std::vector<glm::vec3>& posList, glm::vec3 colour, GLenum type)
 {
 	if (!posList.size())
 		return;
@@ -78,7 +79,7 @@ void Window::renderObject(std::vector<glm::vec3>& posList, GLenum type)
 	auto pers = glm::perspective(glm::radians(60.f), 1024.f/768.f, 0.1f, 100.f);
 
 	standardShader->useShader
-	("view", pers * view);
+	("view", pers * view, "colour", colour);
 
 	glBindBuffer(GL_ARRAY_BUFFER, renderBuffers[thisBuffer]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*posList.size(), &posList.front(), GL_DYNAMIC_DRAW);
@@ -87,6 +88,39 @@ void Window::renderObject(std::vector<glm::vec3>& posList, GLenum type)
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
 	glDrawArrays(type, 0, posList.size());
+	glDisableVertexAttribArray(0);
+}
+
+void Window::renderObject
+	( std::vector<glm::vec3>& posList, std::vector<GLuint>& indexList
+	, glm::vec3 colour, GLenum type)
+{
+	if (!posList.size())
+		return;
+
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+
+	if (freeBuffers >= renderBuffers.size())
+	{
+		renderBuffers.emplace_back();
+		glGenBuffers(1, &renderBuffers.back());
+	}
+	size_t thisBuffer = freeBuffers++;
+
+	auto view = glm::lookAt(cameraPosition, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
+	auto pers = glm::perspective(glm::radians(60.f), 1024.f / 768.f, 0.1f, 100.f);
+
+	standardShader->useShader
+	("view", pers * view, "colour", colour);
+
+
+	glBindBuffer(GL_ARRAY_BUFFER, renderBuffers[thisBuffer]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*posList.size(), &posList.front(), GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+	glBindVertexArray(vao);
+	glEnableVertexAttribArray(0);
+	glDrawElements(type, indexList.size(), GL_UNSIGNED_INT, &indexList.front());
 	glDisableVertexAttribArray(0);
 }
 

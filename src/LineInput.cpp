@@ -3,6 +3,7 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <random>
+#include <chrono>
 
 LineInput::LineInput()
 	: drawing(false)
@@ -104,12 +105,13 @@ void LineInput::createSurface()
 	}
 
 
-	generateVolumePoints(1000);
+	generateVolumePoints(3000);
 }
 
 void LineInput::generateVolumePoints(size_t count)
 {
 	std::default_random_engine generator;
+	generator.seed(std::chrono::high_resolution_clock().now().time_since_epoch().count());
 	std::uniform_real_distribution<float> distribution(0.0, 1.0);
 
 	for (size_t i = 0; i < count; i++)
