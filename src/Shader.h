@@ -13,21 +13,21 @@ public:
     Shader(const std::string& v, const std::string& f);
     
     template <class... T>
-    void useShader(T&&... uniforms)
+    void useShader(T... uniforms)
     {
         glUseProgram(programID);
-        setUniforms(std::forward<T>(uniforms)...);
+        setUniforms((uniforms)...);
     }
 
-    void setUniform(const char*&& name, glm::mat4&& val);
-    void setUniform(const char*&& name, glm::vec3&& val);
-    void setUniform(const char*&& name, glm::vec4&& val);
-    void setUniform(const char*&& name, float val);
+    void setUniform(const char* name, glm::mat4 val);
+    void setUniform(const char* name, glm::vec3 val);
+    void setUniform(const char* name, glm::vec4 val);
+    void setUniform(const char* name, float val);
 
     template <class... T>
-    void setUniforms(T&&... args)
+    void setUniforms(T... args)
     {
-        setUniformsHelper(std::forward<T>(args)...);
+        setUniformsHelper((args)...);
     }
 
 private:
@@ -36,10 +36,10 @@ private:
     void setUniformsHelper();
 
     template <class A, class B, class... T>
-    void setUniformsHelper(A&& name, B&& val, T... rest)
+    void setUniformsHelper(A name, B val, T... rest)
     {
-        setUniform(std::forward<A>(name), std::forward<B>(val));
-        setUniformsHelper(std::forward<T>(rest)...);
+        setUniform((name),(val));
+        setUniformsHelper((rest)...);
     }
 
 
