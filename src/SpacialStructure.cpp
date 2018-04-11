@@ -13,17 +13,17 @@ SpacialStructure::SpacialStructure(glm::vec3 dimensions, glm::vec3 _mins, glm::v
 	mins = _mins;
 	maxs = _maxs;
 
-	spacialX = floor(dimensions.x);
-	spacialY = floor(dimensions.y);
-	spacialZ = floor(dimensions.z);
+	spacingX = floor(dimensions.x);
+	spacingY = floor(dimensions.y);
+	spacingZ = floor(dimensions.z);
 
-	spacialStructure = new cell**[spacialX];
-	for (size_t i = 0; i < spacialX; ++i)
+	spacialStructure = new cell**[spacingX];
+	for (size_t i = 0; i < spacingX; ++i)
 	{
-		spacialStructure[i] = new cell*[spacialY];
-		for (size_t j = 0; j < spacialY; ++j)
+		spacialStructure[i] = new cell*[spacingY];
+		for (size_t j = 0; j < spacingY; ++j)
 		{
-			spacialStructure[i][j] = new cell[spacialZ];
+			spacialStructure[i][j] = new cell[spacingZ];
 		}
 	}
 }
@@ -31,9 +31,9 @@ SpacialStructure::SpacialStructure(glm::vec3 dimensions, glm::vec3 _mins, glm::v
 
 SpacialStructure::~SpacialStructure()
 {
-	for (size_t i = 0; i < spacialX; ++i)
+	for (size_t i = 0; i < spacingX; ++i)
 	{
-		for (size_t j = 0; j < spacialY; ++j)
+		for (size_t j = 0; j < spacingY; ++j)
 		{
 			delete[] spacialStructure[i][j];
 		}
@@ -45,17 +45,17 @@ SpacialStructure::~SpacialStructure()
 
 void SpacialStructure::clearTreeNodes()
 {
-	for (size_t i = 0; i < spacialX; ++i)
-		for (size_t j = 0; j < spacialY; ++j)
-			for (size_t k = 0; k < spacialZ; ++k)
+	for (size_t i = 0; i < spacingX; ++i)
+		for (size_t j = 0; j < spacingY; ++j)
+			for (size_t k = 0; k < spacingZ; ++k)
 				spacialStructure[i][j][k].treeNode.clear();
 }
 
 void SpacialStructure::clearAttractionNodes()
 {
-	for (size_t i = 0; i < spacialX; ++i)
-		for (size_t j = 0; j < spacialY; ++j)
-			for (size_t k = 0; k < spacialZ; ++k)
+	for (size_t i = 0; i < spacingX; ++i)
+		for (size_t j = 0; j < spacingY; ++j)
+			for (size_t k = 0; k < spacingZ; ++k)
 				spacialStructure[i][j][k].attractionNode.clear();
 }
 
@@ -68,9 +68,9 @@ void SpacialStructure::clear()
 
 glm::vec3 SpacialStructure::getCell(glm::vec3 location)
 {
-return glm::vec3(glm::clamp((int)floor((location.x - mins.x / (maxs.x - mins.x)) * spacialX), 0, spacialX - 1),
-				 glm::clamp((int)floor((location.y - mins.y / (maxs.y - mins.y)) * spacialY), 0, spacialY - 1),
-				 glm::clamp((int)floor((location.z - mins.z / (maxs.z - mins.z)) * spacialZ), 0, spacialZ - 1));
+return glm::vec3(glm::clamp((int)floor((location.x - mins.x / (maxs.x - mins.x)) * spacingX), 0, spacingX - 1),
+				 glm::clamp((int)floor((location.y - mins.y / (maxs.y - mins.y)) * spacingY), 0, spacingY - 1),
+				 glm::clamp((int)floor((location.z - mins.z / (maxs.z - mins.z)) * spacingZ), 0, spacingZ - 1));
 }
 
 
@@ -119,4 +119,9 @@ std::vector<int> SpacialStructure::getTreeNodes(glm::vec3 location)
 {
 	glm::vec3 cellPosition = getCell(location);
 	return spacialStructure[(int)cellPosition.x][(int)cellPosition.y][(int)cellPosition.z].treeNode;
+}
+
+glm::vec3 SpacialStructure::getSpacing()
+{
+	return glm::vec3(spacingX, spacingY, spacingZ);
 }
