@@ -33,7 +33,7 @@ void SkeletonGenerator::step()
 	if (isFinished())
 		return;
 
-	const float cullDistance = 0.051f;
+	const float cullDistance = 0.011f;
 	const float nodeDistance = 0.025f;
 
 	for (auto& weight : nodes.nodeWeights)

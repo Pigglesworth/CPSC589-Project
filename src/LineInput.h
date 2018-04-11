@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SpacialStructure.h"
 #include <glm\glm.hpp>
 #include <vector>
 #include <algorithm>
@@ -59,5 +60,7 @@ private:
 	std::vector<glm::vec3> surfaceNormal;
 	std::vector<GLuint> surfaceIndices;
 	std::vector<glm::vec3> volumePoints;
+
+	SpacialStructure* spacialStructure;
 };
 

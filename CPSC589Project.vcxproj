@@ -88,6 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\scot.rahal\Source\Repos\CPSC589-Project\src;C:\Users\scot.rahal\Source\Repos\CPSC589-Project\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>C:\Users\scot.rahal\Source\Repos\CPSC589-Project\libs\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -130,6 +131,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\SkeletonGenerator.cpp" />
+    <ClCompile Include="src\SpacialStructure.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -286,6 +288,7 @@
     <ClInclude Include="src\glm\vec3.hpp" />
     <ClInclude Include="src\glm\vec4.hpp" />
     <ClInclude Include="src\glm\vector_relational.hpp" />
+    <ClInclude Include="src\SpacialStructure.h" />
     <ClInclude Include="src\LineInput.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\SkeletonGenerator.h" />

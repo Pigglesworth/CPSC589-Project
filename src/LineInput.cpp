@@ -104,12 +104,15 @@ void LineInput::createSurface()
 		}
 	}
 
-
 	generateVolumePoints(3000);
 }
 
 void LineInput::generateVolumePoints(size_t count)
 {
+	volumePoints.clear();
+	volumePoints.reserve(count);
+	if(spacialStructure) spacialStructure->clearAttractionNodes();
+
 	std::default_random_engine generator;
 	generator.seed(std::chrono::high_resolution_clock().now().time_since_epoch().count());
 	std::uniform_real_distribution<float> distribution(0.0, 1.0);

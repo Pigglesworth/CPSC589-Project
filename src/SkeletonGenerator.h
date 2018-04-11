@@ -1,5 +1,6 @@
 #pragma once
 
+#include "SpacialStructure.h"
 #include <gl\glew.h>
 #include <glm\glm.hpp>
 
@@ -51,5 +52,7 @@ private:
 	std::vector<glm::vec2> meshTexCoords;
 	std::vector<glm::vec3> meshNormals;
 	std::vector<GLuint> meshIndices;
+
+	SpacialStructure * spacialStructure;
 };
 
