@@ -35,7 +35,7 @@ struct Line
 class LineInput
 {
 public:
-	LineInput();
+	LineInput(SpacialStructure* space);
 	~LineInput();
 
 	void update(float mouseX, float mouseY, bool mouseIsDown);
