@@ -11,9 +11,8 @@ bool exportObj = true;
 int main()
 {
 	Window window;
-	SpacialStructure* space = new SpacialStructure(glm::vec3(10));
-	LineInput lineDrawer(space);
-	SkeletonGenerator skeletal(space);
+	LineInput lineDrawer;
+	SkeletonGenerator skeletal;
 	ObjExporter objer;
 
 	int waitForPointPlacement = 0;

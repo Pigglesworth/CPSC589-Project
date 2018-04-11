@@ -9,7 +9,7 @@
 class SkeletonGenerator
 {
 public:
-	SkeletonGenerator(SpacialStructure* space);
+	SkeletonGenerator();
 	~SkeletonGenerator();
 
 	

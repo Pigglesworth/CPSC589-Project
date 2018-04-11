@@ -5,8 +5,8 @@
 #include <random>
 #include <chrono>
 
-LineInput::LineInput(SpacialStructure* space)
-	: drawing(false), spacialStructure(space)
+LineInput::LineInput()
+	: drawing(false)
 {
 }
 
