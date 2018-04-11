@@ -6,7 +6,7 @@
 #include "SkeletonGenerator.h"
 #include "ObjExporter.h"
 
-bool exportObj = false;
+bool exportObj = true;
 
 int main()
 {
@@ -22,7 +22,6 @@ int main()
 	{
 		{
 			auto mouse = window.getMousePosition();
-
 
 			if (waitForPointPlacement == 2 && !window.getMouseDown())
 				waitForPointPlacement = 0;
@@ -98,9 +97,6 @@ int main()
 
 		}
 
-
-
-		
 		window.render();
 	}
 

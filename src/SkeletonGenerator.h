@@ -43,8 +43,7 @@ private:
 		std::vector<std::vector<size_t>> nodeChildren;
 	};
 
-	std::vector<std::pair<size_t,size_t>> makeRevolutionList(NodeList& nodes, size_t start = 0);
-	void createRevolution(NodeList& nodes, size_t point1, size_t point2);
+	void createRevolution(size_t point1, size_t point2);
 
 	NodeList nodes;
 	std::vector<GLuint> nodeIndices;

@@ -8,6 +8,8 @@
 
 bool Window::doneInit = false;
 
+extern bool exportObj;
+
 Window::Window()
 	: mouseX(0.f), mouseY(0.f), mouseIsDown(false)
 	, cameraPosition(0,0,1)
@@ -138,7 +140,7 @@ void Window::renderObject(std::vector<glm::vec3>& posList, std::vector<glm::vec3
 		return;
 
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+	glDisable(GL_CULL_FACE);
 
 	while (freeBuffers+1 >= renderBuffers.size())
 	{
@@ -239,8 +241,15 @@ void Window::handleKeyState(GLFWwindow * window, int key, int scancode, int acti
 
 		case GLFW_KEY_S:
 		{
-			cameraPosition.x /= 0.75f;
-			cameraPosition.z /= 0.75f;
+			if (mods == GLFW_MOD_CONTROL)
+			{
+				exportObj = false;
+			}
+			else
+			{
+				cameraPosition.x /= 0.75f;
+				cameraPosition.z /= 0.75f;
+			}
 			break;
 		}
 
