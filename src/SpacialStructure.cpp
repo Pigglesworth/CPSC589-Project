@@ -108,7 +108,6 @@ void SpacialStructure::deleteTreeNode(glm::vec3* location, int index)
 	}
 }
 
-
 std::vector<glm::vec3*> SpacialStructure::getAttractionNodes(glm::vec3 location)
 {
 	glm::vec3 cellPosition = getCell(location);
@@ -123,5 +122,7 @@ std::vector<int> SpacialStructure::getTreeNodes(glm::vec3 location)
 
 glm::vec3 SpacialStructure::getSpacing()
 {
-	return glm::vec3(spacingX, spacingY, spacingZ);
+	glm::vec3 wholeSpace = maxs - mins;
+
+	return glm::vec3(wholeSpace.x / spacingX, wholeSpace.y / spacingY, wholeSpace.z / spacingZ);
 }
