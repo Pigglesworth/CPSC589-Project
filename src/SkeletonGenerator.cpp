@@ -5,8 +5,6 @@
 #include <algorithm>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <iostream>
-
 
 SkeletonGenerator::SkeletonGenerator(SpacialStructure* space)
 	: activePoints(0), stepCount(0), spacialStructure(space)
@@ -26,7 +24,6 @@ void SkeletonGenerator::begin(std::vector<glm::vec3>& _points, glm::vec3 startin
 	{
 		points.emplace_back(point, true);
 	}
-
 	trunk = true;
 	activePoints = points.size();
 	addNode(startingPoint, 0);
@@ -39,9 +36,9 @@ void SkeletonGenerator::step()
 
 	nodeAdded = false;
 
-	const float cullDistance = 0.005f;
+	const float cullDistance = 0.05f;
 	const float searchDistance = 0.1f;
-	const float nodeDistance = 0.004f;
+	const float nodeDistance = 0.04f;
 
 	// for all the points find the closest node
 	for (auto& point : points)
@@ -53,51 +50,7 @@ void SkeletonGenerator::step()
 		glm::vec3 difference;
 		float distance = FLT_MAX;
 
-		std::vector<int> nearNodes;
-
-		glm::vec3 spacing = spacialStructure->getSpacing();
-		glm::vec3 spacialSearchRadius = (searchDistance * 2.f / spacing) + spacing;
-
-
-		//std::cout << nodes.nodePoints.size();
-		int nodeNum = 0;
-		for (float x = 0; x <= 1; x += spacing.x)
-		{
-			for (float y = 0; y <= 1; y += spacing.y)
-			{
-				for (float z = 0; z <= 1; z += spacing.z)
-				{
-					nodeNum += spacialStructure->getTreeNodes(glm::vec3(x, y, z)).size();
-				}
-			}
-		}
-
-		//std::cout << " ==? " << nodeNum << std::endl;
-
-		if (!trunk && 0)
-		{
-			//iterate over the search space
-			for (float x = point.first.x - spacialSearchRadius.x; x <= point.first.x + spacialSearchRadius.x; x += spacing.x)
-			{
-				for (float y = point.first.y - spacialSearchRadius.y; y <= point.first.y + spacialSearchRadius.y; y += spacing.y)
-				{
-					for (float z = point.first.z - spacialSearchRadius.z; z <= point.first.z + spacialSearchRadius.z; z += spacing.z)
-					{
-						std::vector<int> cellNodes = spacialStructure->getTreeNodes(glm::vec3(x, y, z));
-						nearNodes.insert(nearNodes.end(), cellNodes.begin(), cellNodes.end());
-					}
-				}
-			}
-		}
-		else
-		{
-			for (int i = 0; i < nodes.nodePoints.size(); ++i)
-			{
-				nearNodes.emplace_back(i);
-			}
-		}
-		// check for the closest tree node to the point
-		for (int i : nearNodes)
+		for (size_t i = 0; i < nodes.nodePoints.size(); i++)
 		{
 			glm::vec3 diff = point.first - nodes.nodePoints[i];
 			float dist = glm::length(diff);
@@ -114,6 +67,7 @@ void SkeletonGenerator::step()
 		{
 			nodes.nodeWeights[closestPoint] += glm::normalize(difference);
 		}
+
 		if (distance < cullDistance)
 		{
 			trunk = false;
@@ -125,7 +79,7 @@ void SkeletonGenerator::step()
 	const size_t weightCount = nodes.nodeWeights.size();
 	for (size_t i = 0; i < weightCount; i++)
 	{
-		if (nodes.nodeWeights[i].x > 0.0001f || nodes.nodeWeights[i].y > 0.0001f || nodes.nodeWeights[i].z > 0.0001f)
+		if (nodes.nodeWeights[i] != glm::vec3(0.f))
 		{
 			glm::vec3 newPos(glm::normalize(nodes.nodeWeights[i]) * nodeDistance + nodes.nodePoints[i]);
 			addNode(newPos, i);
@@ -160,8 +114,6 @@ void SkeletonGenerator::clear()
 	nodes.nodeParents.clear();
 	nodes.nodeChildren.clear();
 	nodeIndices.clear();
-
-	spacialStructure->clear();
 }
 
 std::vector<glm::vec3>& SkeletonGenerator::getNodePositions()
@@ -199,24 +151,15 @@ std::vector<GLuint>& SkeletonGenerator::getMeshIndices()
 void SkeletonGenerator::addNode(glm::vec3 position, size_t parent)
 {
 	nodeAdded = true;
-
-	std::cout << position.x  << " " << position.y << " "<< position.z << std::endl;
-
-	int index = nodes.nodePoints.size();
-
 	if (parent < nodes.nodeChildren.size())
-	{
 		nodes.nodeChildren[parent].emplace_back(nodes.nodeChildren.size());
-	}
 
 	nodes.nodePoints.emplace_back(position);
 	nodes.nodeWeights.emplace_back(glm::vec3(0.f));
 	nodes.nodeParents.emplace_back(parent);
 	nodes.nodeChildren.emplace_back();
 	nodeIndices.emplace_back(parent);
-	nodeIndices.emplace_back(index);
-
-	spacialStructure->addTreeNode(&position, index);
+	nodeIndices.emplace_back(nodes.nodePoints.size() - 1);
 }
 
 void SkeletonGenerator::generateMesh()
@@ -247,7 +190,7 @@ void SkeletonGenerator::createRevolution(size_t point1, size_t point2)
 		}
 	}
 
-	
+
 	glm::vec3 diff = glm::normalize(nodes.nodePoints[point1] - nodes.nodePoints[point2]);
 	glm::vec3 out = glm::normalize(glm::cross(diff, glm::vec3(diff.y, diff.x, diff.z)));
 
