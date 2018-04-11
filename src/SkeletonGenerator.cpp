@@ -108,6 +108,7 @@ void SkeletonGenerator::clear()
 	nodes.nodePoints.clear();
 	nodes.nodeWeights.clear();
 	nodes.nodeParents.clear();
+	nodes.nodeChildren.clear();
 	nodeIndices.clear();
 }
 
@@ -124,6 +125,11 @@ std::vector<GLuint>& SkeletonGenerator::getNodeIndices()
 std::vector<glm::vec3>& SkeletonGenerator::getMeshPoints()
 {
 	return meshPoints;
+}
+
+std::vector<glm::vec2>& SkeletonGenerator::getMeshTexCoords()
+{
+	return meshTexCoords;
 }
 
 std::vector<glm::vec3>& SkeletonGenerator::getMeshNormals()
@@ -157,13 +163,42 @@ void SkeletonGenerator::generateMesh()
 	meshTexCoords.clear();
 	meshNormals.clear();
 	meshIndices.clear();
-	for (size_t i = 0; i < nodes.nodeParents.size(); i++)
+
+
+	auto list = makeRevolutionList(nodes);
+
+	for (auto& nodePair : list)
 	{
-		createRevolution(i, nodes.nodeParents[i]);
+		createRevolution(nodes, nodePair.first, nodePair.second);
 	}
 }
 
-void SkeletonGenerator::createRevolution(size_t point1, size_t point2)
+std::vector<std::pair<size_t,size_t>> SkeletonGenerator::makeRevolutionList(NodeList& nodes, size_t start)
+{
+	std::vector<std::pair<size_t, size_t>> nodeList;
+
+	if (!nodes.nodeChildren[start].size())
+		return nodeList;
+
+	size_t nextNode = start;
+	while (nodes.nodeChildren[nextNode].size() == 1)
+	{
+		nextNode = nodes.nodeChildren[nextNode].front();
+	}
+
+	nodeList.emplace_back(start, nextNode);
+
+	for (auto& node : nodes.nodeChildren[nextNode])
+	{
+		nodeList.emplace_back(nextNode, node);
+		auto newList = makeRevolutionList(nodes, node);
+		nodeList.insert(nodeList.end(), newList.begin(), newList.end());
+	}
+
+	return nodeList;
+}
+
+void SkeletonGenerator::createRevolution(NodeList& nodes, size_t point1, size_t point2)
 {
 	if (point1 == point2)
 		return;
@@ -189,7 +224,7 @@ void SkeletonGenerator::createRevolution(size_t point1, size_t point2)
 	if (meshPoints.size())
 	 indexOffset = meshPoints.size() - 1;
 
-	const size_t u_steps = 3;
+	const size_t u_steps = 4;
 	const size_t v_steps = 4;
 
 	for (size_t ui = 0; ui < u_steps; ui++)
@@ -199,18 +234,15 @@ void SkeletonGenerator::createRevolution(size_t point1, size_t point2)
 
 		for (size_t vi = 0; vi < v_steps; vi++)
 		{
-			float v = ( ((float)vi) / (v_steps - 1)) * 2 * M_PI;
-			if (vi + 1 == v_steps)
-				v = 0.f;
-
+			float v = ( ((float)vi) / v_steps) * 2 * M_PI;
 
 			glm::vec3 normal = glm::vec3(glm::vec4(out,1.f) * glm::rotate(glm::mat4(1.f), v, diff));
 
-			normal *= std::min(0.01f, 0.03f / nodeDepth);
+			normal *= std::min(0.01f, (0.03f / nodeDepth)*(1.f-u) + (0.03f / (nodeDepth+1))*u);
 
 			meshPoints.emplace_back(linePoint + normal);
 			meshTexCoords.emplace_back(u, ((float)vi) / (v_steps - 1));
-			meshNormals.emplace_back(normal);
+			meshNormals.emplace_back(-normal);
 
 			if (ui + 1 < u_steps && vi + 1 < v_steps)
 			{
@@ -219,10 +251,23 @@ void SkeletonGenerator::createRevolution(size_t point1, size_t point2)
 				meshIndices.emplace_back((ui + 1)*v_steps + vi + indexOffset);
 
 				meshIndices.emplace_back(ui*v_steps + vi + 1 + indexOffset);
-				meshIndices.emplace_back((ui + 1)*v_steps + vi + indexOffset);
 				meshIndices.emplace_back((ui + 1)*v_steps + vi + 1 + indexOffset);
+				meshIndices.emplace_back((ui + 1)*v_steps + vi + indexOffset);
 			}
+			else if (ui + 1 < u_steps)
+			{
+				meshIndices.emplace_back(ui*v_steps + vi + indexOffset);
+				meshIndices.emplace_back(ui*v_steps + indexOffset);
+				meshIndices.emplace_back((ui + 1)*v_steps + vi + indexOffset);
+
+				meshIndices.emplace_back(ui*v_steps + indexOffset);
+				meshIndices.emplace_back((ui + 1)*v_steps + indexOffset);
+				meshIndices.emplace_back((ui + 1)*v_steps + vi + indexOffset);
+			}
+
+
 		}
+
 	}
 
 }

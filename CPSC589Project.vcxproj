@@ -76,6 +76,7 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
       <AdditionalDependencies>opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -120,12 +121,14 @@
   <ItemGroup>
     <ClCompile Include="src\LineInput.cpp" />
     <ClCompile Include="src\main.cpp" />
+    <ClCompile Include="src\ObjExporter.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\SkeletonGenerator.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\LineInput.h" />
+    <ClInclude Include="src\ObjExporter.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\SkeletonGenerator.h" />
     <ClInclude Include="src\Window.h" />
