@@ -49,6 +49,8 @@ private:
 	NodeList nodes;
 	std::vector<GLuint> nodeIndices;
 
+	bool trunk;
+	bool nodeAdded;
 
 	std::vector<glm::vec3> meshPoints;
 	std::vector<glm::vec2> meshTexCoords;
