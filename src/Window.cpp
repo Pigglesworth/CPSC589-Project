@@ -2,19 +2,23 @@
 
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/rotate_vector.hpp>
+
 
 bool Window::doneInit = false;
 
 Window::Window()
 	: mouseX(0.f), mouseY(0.f), mouseIsDown(false)
 	, cameraPosition(0,0,1)
+	, winWidth(1024), winHeight(768)
 {
 	if (!doneInit)
 		doInit();
 
 	glfwWindowHint(GLFW_DEPTH_BITS, 8);
 
-	window = glfwCreateWindow(1024, 768, "CPSC 589 Tree Generator", NULL, NULL);
+	window = glfwCreateWindow(winWidth, winHeight, "CPSC 589 Tree Generator", NULL, NULL);
 
 	if (!doneInit)
 	{
@@ -40,6 +44,10 @@ Window::Window()
 	auto keyLambda = [](GLFWwindow* w, int k, int s, int a, int m)
 	{ static_cast<Window*>(glfwGetWindowUserPointer(w))->handleKeyState(w, k, s, a, m); };
 	glfwSetKeyCallback(window, keyLambda);
+
+	auto resizeLambda = [](GLFWwindow* win, int w, int h)
+	{ static_cast<Window*>(glfwGetWindowUserPointer(win))->handleWindowResize(win, w, h); };
+	glfwSetWindowSizeCallback(window, resizeLambda);
 
 
 
@@ -75,11 +83,11 @@ void Window::renderObject
 	size_t thisBuffer = freeBuffers++;
 
 
-	auto view = glm::lookAt(cameraPosition, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	auto pers = glm::perspective(glm::radians(60.f), 1024.f/768.f, 0.1f, 100.f);
+
+	auto vp = makeVPMatrix();
 
 	standardShader->useShader
-	("view", pers * view, "colour", colour);
+	("view", vp, "colour", colour);
 
 	glBindBuffer(GL_ARRAY_BUFFER, renderBuffers[thisBuffer]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*posList.size(), &posList.front(), GL_DYNAMIC_DRAW);
@@ -108,11 +116,11 @@ void Window::renderObject
 	}
 	size_t thisBuffer = freeBuffers++;
 
-	auto view = glm::lookAt(cameraPosition, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	auto pers = glm::perspective(glm::radians(60.f), 1024.f / 768.f, 0.1f, 100.f);
+
+	auto vp = makeVPMatrix();
 
 	standardShader->useShader
-	("view", pers * view, "colour", colour);
+	("view", vp, "colour", colour);
 
 
 	glBindBuffer(GL_ARRAY_BUFFER, renderBuffers[thisBuffer]);
@@ -140,11 +148,10 @@ void Window::renderObject(std::vector<glm::vec3>& posList, std::vector<glm::vec3
 	size_t posBuffer = freeBuffers++;
 	size_t normBuffer = freeBuffers++;
 
-	auto view = glm::lookAt(cameraPosition, glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	auto pers = glm::perspective(glm::radians(60.f), 1024.f / 768.f, 0.1f, 100.f);
+	auto vp = makeVPMatrix();
 
 	meshShader->useShader
-	("view", pers * view);
+	("view", vp);
 
 	glBindBuffer(GL_ARRAY_BUFFER, renderBuffers[posBuffer]);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*posList.size(), &posList.front(), GL_DYNAMIC_DRAW);
@@ -203,23 +210,63 @@ bool Window::getMouseDown()
 
 void Window::handleKeyState(GLFWwindow * window, int key, int scancode, int action, int mods)
 {
-	if (key == GLFW_KEY_A)
+	if (action == GLFW_PRESS || action == GLFW_REPEAT)
 	{
-		auto newPos = glm::vec4(cameraPosition,0.f) * glm::rotate(glm::mat4(1.f), .1f, glm::vec3(0, 1, 0));
-		cameraPosition = glm::vec3(newPos);
+		switch (key)
+		{
+		
+		
+		case GLFW_KEY_A:
+		{
+			auto newPos = glm::vec4(cameraPosition, 0.f) * glm::rotate(glm::mat4(1.f), .1f, glm::vec3(0, 1, 0));
+			cameraPosition = glm::vec3(newPos);
+			break;
+		}
+
+		case GLFW_KEY_D:
+		{
+			auto newPos = glm::vec4(cameraPosition, 0.f) * glm::rotate(glm::mat4(1.f), -.1f, glm::vec3(0, 1, 0));
+			cameraPosition = glm::vec3(newPos);
+			break;
+		}
+
+		case GLFW_KEY_W:
+		{
+			cameraPosition.x *= 0.75f;
+			cameraPosition.z *= 0.75f;
+			break;
+		}
+
+		case GLFW_KEY_S:
+		{
+			cameraPosition.x /= 0.75f;
+			cameraPosition.z /= 0.75f;
+			break;
+		}
+
+		case GLFW_KEY_Q:
+		{
+			cameraPosition.y += 0.05f;
+			break;
+		}
+
+		case GLFW_KEY_E:
+		{
+			cameraPosition.y -= 0.05f;
+			break;
+		}
+
+		}
 	}
 }
 
 void Window::handleMoveMouse(GLFWwindow * window, double x, double y)
 {
-	auto view = glm::lookAt(glm::vec3(0.f,0.f,1.f), glm::vec3(0, 0, 0), glm::vec3(0, 1, 0));
-	auto pers = glm::perspective(glm::radians(60.f), 1024.f / 768.f, 0.1f, 100.f);
-
-	auto inv = glm::inverse(pers * view);
+	auto inv = glm::inverse(makeVPMatrix());
 
 	glm::vec4 v(0.f, 0.f, 0.f, 1.f);
-	v.x = ((x / 1024) - 0.5f)*2.f;
-	v.y = ((y / 768) - 0.5f)*-2.f;
+	v.x = ((x / winWidth) - 0.5f)*2.f;
+	v.y = ((y / winHeight) - 0.5f)*-2.f;
 
 	v = inv * v;
 
@@ -238,6 +285,21 @@ void Window::handleMouseState(GLFWwindow * window, int button, int action, int m
 	{
 		mouseIsDown = false;
 	}
+}
+
+void Window::handleWindowResize(GLFWwindow * window, int w, int h)
+{
+	winWidth = w;
+	winHeight = h;
+	glfwGetFramebufferSize(window, &w, &h);
+	glViewport(0, 0, w, h);
+}
+
+glm::mat4 Window::makeVPMatrix()
+{
+	auto view = glm::lookAt(cameraPosition, glm::vec3(0, cameraPosition.y, 0), glm::vec3(0, 1, 0));
+	auto pers = glm::perspective(glm::radians(60.f), (float)winWidth / winHeight, 0.1f, 100.f);
+	return pers * view;
 }
 
 
