@@ -21,25 +21,25 @@ Shader::Shader(const std::string& v, const std::string& f)
 
 
 
-void Shader::setUniform(const char*&& name, glm::mat4&& val)
+void Shader::setUniform(const char* name, glm::mat4 val)
 {
     GLint loc = glGetUniformLocation(programID, name);
     glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(val));
 }
 
-void Shader::setUniform(const char*&& name, glm::vec4&& val)
+void Shader::setUniform(const char* name, glm::vec4 val)
 {
     GLint loc = glGetUniformLocation(programID, name);
     glUniform4fv(loc, 1, glm::value_ptr(val));
 }
 
-void Shader::setUniform(const char*&& name, glm::vec3&& val)
+void Shader::setUniform(const char* name, glm::vec3 val)
 {
     GLint loc = glGetUniformLocation(programID, name);
     glUniform3fv(loc, 1, glm::value_ptr(val));
 }
 
-void Shader::setUniform(const char*&& name, float val)
+void Shader::setUniform(const char* name, float val)
 {
     GLint loc = glGetUniformLocation(programID, name);
     glUniform1f(loc,val);
