@@ -24,6 +24,7 @@ public:
 	std::vector<GLuint>& getNodeIndices();
 
 	std::vector<glm::vec3>& getMeshPoints();
+	std::vector<glm::vec2>& getMeshTexCoords();
 	std::vector<glm::vec3>& getMeshNormals();
 	std::vector<GLuint>& getMeshIndices();
 private:
@@ -33,8 +34,6 @@ private:
 	void addNode(glm::vec3 position, size_t parent);
 
 	void generateMesh();
-	void createRevolution(size_t point1, size_t point2);
-
 
 	struct NodeList
 	{
@@ -43,6 +42,9 @@ private:
 		std::vector<size_t> nodeParents;
 		std::vector<std::vector<size_t>> nodeChildren;
 	};
+
+	std::vector<std::pair<size_t,size_t>> makeRevolutionList(NodeList& nodes, size_t start = 0);
+	void createRevolution(NodeList& nodes, size_t point1, size_t point2);
 
 	NodeList nodes;
 	std::vector<GLuint> nodeIndices;

@@ -130,7 +130,7 @@ void Window::renderObject(std::vector<glm::vec3>& posList, std::vector<glm::vec3
 		return;
 
 	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_CULL_FACE);
+	glEnable(GL_CULL_FACE);
 
 	while (freeBuffers+1 >= renderBuffers.size())
 	{

@@ -4,12 +4,16 @@
 #include "Window.h"
 #include "LineInput.h"
 #include "SkeletonGenerator.h"
+#include "ObjExporter.h"
+
+bool exportObj = false;
 
 int main()
 {
 	Window window;
 	LineInput lineDrawer;
 	SkeletonGenerator skeletal;
+	ObjExporter objer;
 
 	while (window.isOpen())
 	{
@@ -66,6 +70,14 @@ int main()
 				if (skeletal.isFinished())
 				{
 					window.renderObject(skeletal.getMeshPoints(), skeletal.getMeshNormals(), skeletal.getMeshIndices());
+					if (!exportObj)
+					{
+						objer.exportMesh
+							( skeletal.getMeshPoints(), skeletal.getMeshTexCoords()
+							, skeletal.getMeshNormals(), skeletal.getMeshIndices());
+
+						exportObj = true;
+					}
 				}
 				else
 				{
