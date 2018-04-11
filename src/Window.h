@@ -32,6 +32,11 @@ private:
 	void handleKeyState(GLFWwindow* window, int key, int scancode, int action, int mods);
 	void handleMoveMouse(GLFWwindow* window, double x, double y);
 	void handleMouseState(GLFWwindow* window, int button, int action, int mods);
+	void handleWindowResize(GLFWwindow* window, int w, int h);
+
+	glm::mat4 makeVPMatrix();
+
+	int winWidth, winHeight;
 	float mouseX, mouseY;
 	bool mouseIsDown;
 

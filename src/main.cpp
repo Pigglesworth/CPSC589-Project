@@ -15,11 +15,20 @@ int main()
 	SkeletonGenerator skeletal;
 	ObjExporter objer;
 
+	int waitForPointPlacement = 0;
+
+
 	while (window.isOpen())
 	{
 		{
 			auto mouse = window.getMousePosition();
-			lineDrawer.update(mouse.first, mouse.second, window.getMouseDown());
+
+
+			if (waitForPointPlacement == 2 && !window.getMouseDown())
+				waitForPointPlacement = 0;
+
+			if(!waitForPointPlacement)
+				lineDrawer.update(mouse.first, mouse.second, window.getMouseDown());
 
 			auto& lines = lineDrawer.getLines();
 			for (auto& line : lines)
@@ -47,15 +56,13 @@ int main()
 
 					if (!skeletal.hasStarted())
 					{
-						glm::vec3 bottom(FLT_MAX);
-						for (auto& point : test)
-						{
-							if (point.y < bottom.y)
-								bottom = point;
-						}
-						bottom.y -= 0.1;
+						waitForPointPlacement = 1;
 
-						skeletal.begin(lineDrawer.getVolumePoints(), glm::vec3(bottom));
+						if (window.getMouseDown())
+						{
+							skeletal.begin(lineDrawer.getVolumePoints(), glm::vec3(mouse.first,mouse.second,0.f));
+							waitForPointPlacement = 2;
+						}
 					}
 					else
 					{
