@@ -123,6 +123,5 @@ std::vector<int> SpacialStructure::getTreeNodes(glm::vec3 location)
 glm::vec3 SpacialStructure::getSpacing()
 {
 	glm::vec3 wholeSpace = maxs - mins;
-
 	return glm::vec3(wholeSpace.x / spacingX, wholeSpace.y / spacingY, wholeSpace.z / spacingZ);
 }

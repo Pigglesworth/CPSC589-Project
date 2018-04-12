@@ -28,27 +28,30 @@ public:
 	std::vector<glm::vec3>& getMeshNormals();
 	std::vector<GLuint>& getMeshIndices();
 private:
-	std::vector<std::pair<glm::vec3, bool>> points;
+	std::vector<std::pair<glm::vec3, bool>> attractionPoints;
 	size_t activePoints, stepCount;
 
 	void addNode(glm::vec3 position, size_t parent);
 
 	void generateMesh();
 
-	struct NodeList
+	struct Node
 	{
-		std::vector<glm::vec3> nodePoints;
-		std::vector<glm::vec3> nodeWeights;
-		std::vector<size_t> nodeParents;
-		std::vector<std::vector<size_t>> nodeChildren;
+		glm::vec3 nodePoint;
+		glm::vec3 nodeWeight;
+		size_t nodeParent;
+		std::vector<size_t> nodeChildren;
+		size_t depth;
+		bool trunk;
 	};
 
 	void createRevolution(size_t point1, size_t point2);
 
-	NodeList nodes;
+	std::vector<Node> nodes;
 	std::vector<GLuint> nodeIndices;
+	std::vector<glm::vec3> nodePositions;
 
-	bool trunk;
+	int trunks;
 	bool nodeAdded;
 
 	std::vector<glm::vec3> meshPoints;
@@ -57,5 +60,7 @@ private:
 	std::vector<GLuint> meshIndices;
 
 	SpacialStructure * spacialStructure;
+
+	size_t maxDepth;
 };
 
