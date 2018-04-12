@@ -48,7 +48,7 @@ void SkeletonGenerator::step()
 	// for all the points find the closest node
 	for (auto& point : attractionPoints)
 	{
-		if (!point.second)
+		if (!point.second && !trunks)
 			continue;
 
 		int closestPoint = -1;
@@ -60,7 +60,7 @@ void SkeletonGenerator::step()
 			glm::vec3 diff = point.first - nodes[i].nodePoint;
 			float dist = glm::length(diff);
 
-			if (dist < distance && (dist < searchDistance || trunks > 0))
+			if (dist < distance && (dist < searchDistance || nodes[i].trunk))
 			{
 				closestPoint = i;
 				difference = diff;
@@ -68,19 +68,24 @@ void SkeletonGenerator::step()
 			}
 		}
 
-		if (closestPoint >= 0)
+		if (closestPoint >= 0 && point.second)
 		{
 			nodes[closestPoint].nodeWeight += glm::normalize(difference);
 		}
 
-		if (distance < cullDistance)
+		if (distance < cullDistance && closestPoint >= 0)
 		{
 			if (nodes[closestPoint].trunk) {
 				trunks--;
-				nodes[closestPoint].trunk = false;
+				int pointIndex = closestPoint;
+				do
+				{
+					nodes[pointIndex].trunk = false;
+					pointIndex = nodes[pointIndex].nodeParent;
+				} while (nodes[pointIndex].trunk || pointIndex);
 			}
+			if (point.second) activePoints--;
 			point.second = false;
-			activePoints--;
 		}
 	}
 
