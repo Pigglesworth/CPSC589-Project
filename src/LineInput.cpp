@@ -35,7 +35,10 @@ void LineInput::update(float x, float y, bool isDown)
 	{
 		drawing = false;
 		if (lines.size() == 2)
+		{
 			createSurface();
+			generateVolumePoints(30000);
+		}
 	}
 
 
@@ -103,8 +106,6 @@ void LineInput::createSurface()
 			}
 		}
 	}
-
-	generateVolumePoints(3000);
 }
 
 void LineInput::generateVolumePoints(size_t count)

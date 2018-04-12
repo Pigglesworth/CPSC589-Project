@@ -103,13 +103,49 @@ void SkeletonGenerator::step()
 	stepCount++;
 	if (isFinished())
 	{
-		smooth();
 		generateMesh();
 	}
 }
 
 
-void SkeletonGenerator::smooth() {
+int SkeletonGenerator::getNodeCount() 
+{
+	return nodes.size();
+}
+
+void SkeletonGenerator::smoothAndUpdate() 
+{
+	smooth();
+	generateMesh();
+}
+
+void SkeletonGenerator::smooth()
+{
+	SkeletonGenerator newNodes = *this;
+
+	for (size_t j = 0; j < nodes[0].nodeChildren.size(); ++j) 
+	{
+		newNodes.addNode((nodes[0].nodePoint + nodes[nodes[0].nodeChildren[j]].nodePoint) * .5f, 0);
+	}
+
+	for (size_t i = 1; i < nodes.size(); ++i)
+	{
+		int parentIndex = nodes[i].nodeParent;
+		newNodes.nodes[i].nodePoint = nodes[parentIndex].nodePoint * .75f + nodes[i].nodePoint * .25f;
+		for (size_t j = 0; j < nodes[i].nodeChildren.size(); ++j)
+		{
+			int childIndex = nodes[i].nodeChildren[j];	
+			newNodes.addNode(nodes[i].nodePoint * .75f + nodes[childIndex].nodePoint * .25f, i);
+
+			int parent = newNodes.getNodeCount() - 1;
+
+			for (size_t k = 0; k < nodes[childIndex].nodeChildren.size(); ++k)
+			{
+				nodes[k].nodeParent = parent;
+			}
+		}
+	}
+	*this = newNodes;
 }
 
 bool SkeletonGenerator::hasStarted()
@@ -130,6 +166,7 @@ void SkeletonGenerator::clear()
 	nodes.clear();
 	nodeIndices.clear();
 	nodePositions.clear();
+	spacialStructure->clear();
 }
 
 std::vector<glm::vec3>& SkeletonGenerator::getNodePositions()

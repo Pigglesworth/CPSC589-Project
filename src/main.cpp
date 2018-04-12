@@ -7,6 +7,7 @@
 #include "ObjExporter.h"
 
 bool exportObj = true;
+bool smooth = false;
 
 int main()
 {
@@ -53,7 +54,6 @@ int main()
 		
 				if (lineDrawer.getVolumePoints().size())
 				{
-
 					if (!skeletal.hasStarted())
 					{
 						waitForPointPlacement = 1;
@@ -76,6 +76,12 @@ int main()
 
 				if (skeletal.isFinished())
 				{
+					if (smooth)
+					{
+						skeletal.smoothAndUpdate();
+						smooth = false;
+					}
+
 					window.renderObject(skeletal.getMeshPoints(), skeletal.getMeshNormals(), skeletal.getMeshIndices());
 					if (!exportObj)
 					{

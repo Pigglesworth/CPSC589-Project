@@ -9,6 +9,7 @@
 bool Window::doneInit = false;
 
 extern bool exportObj;
+extern bool smooth;
 
 Window::Window()
 	: mouseX(0.f), mouseY(0.f), mouseIsDown(false)
@@ -216,8 +217,6 @@ void Window::handleKeyState(GLFWwindow * window, int key, int scancode, int acti
 	{
 		switch (key)
 		{
-		
-		
 		case GLFW_KEY_A:
 		{
 			auto newPos = glm::vec4(cameraPosition, 0.f) * glm::rotate(glm::mat4(1.f), .1f, glm::vec3(0, 1, 0));
@@ -264,7 +263,11 @@ void Window::handleKeyState(GLFWwindow * window, int key, int scancode, int acti
 			cameraPosition.y -= 0.05f;
 			break;
 		}
-
+		case GLFW_KEY_UP:
+		{
+			smooth = true;
+			break;
+		}
 		}
 	}
 }

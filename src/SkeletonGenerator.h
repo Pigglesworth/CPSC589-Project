@@ -19,6 +19,7 @@ public:
 	bool isFinished();
 	void clear();
 
+	void smoothAndUpdate();
 
 	std::vector<glm::vec3>& getNodePositions();
 	std::vector<GLuint>& getNodeIndices();
@@ -62,6 +63,8 @@ private:
 	std::vector<GLuint> meshIndices;
 
 	SpacialStructure * spacialStructure;
+
+	int getNodeCount();
 
 	size_t maxDepth;
 };
