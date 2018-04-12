@@ -103,8 +103,13 @@ void SkeletonGenerator::step()
 	stepCount++;
 	if (isFinished())
 	{
+		smooth();
 		generateMesh();
 	}
+}
+
+
+void SkeletonGenerator::smooth() {
 }
 
 bool SkeletonGenerator::hasStarted()

@@ -33,6 +33,8 @@ private:
 
 	void addNode(glm::vec3 position, size_t parent);
 
+	void smooth();
+
 	void generateMesh();
 
 	struct Node
