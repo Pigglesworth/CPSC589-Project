@@ -10,6 +10,8 @@ bool Window::doneInit = false;
 
 extern bool exportObj;
 extern bool smooth;
+extern bool placeTrunk;
+extern bool finishTree;
 
 Window::Window()
 	: mouseX(0.f), mouseY(0.f), mouseIsDown(false)
@@ -335,9 +337,24 @@ void Window::handleKeyState(GLFWwindow * window, int key, int scancode, int acti
 		}
 		case GLFW_KEY_UP:
 		{
-			smooth = true;
+			placeTrunk = true;
 			break;
 		}
+
+        case GLFW_KEY_ENTER:
+        {
+            placeTrunk = true;
+            break;
+        }
+
+        case GLFW_KEY_ESCAPE:
+        {
+            finishTree = true;
+            break;
+        }
+        
+
+
 		}
 	}
 }

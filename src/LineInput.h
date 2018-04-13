@@ -41,6 +41,12 @@ public:
 	void update(float mouseX, float mouseY, bool mouseIsDown);
 	void setDensity(size_t density);
 
+    void setFinished(bool finished);
+    void clear();
+
+    bool isFinished();
+    bool hasBegun();
+
 	std::vector<Line>& getLines();
 	std::vector<glm::vec3>& getSurface();
 	std::vector<glm::vec3>& getSurfaceNormals();
@@ -55,6 +61,7 @@ private:
 	glm::vec3 getVolumePoint(float u, float v, float w);
 	glm::vec3 getVolumeNormal(float u, float v, float w);
 
+    bool finished;
 	bool drawing;
 	std::vector<Line> lines;
 	std::vector<glm::vec3> surface;

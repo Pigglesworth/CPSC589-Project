@@ -7,6 +7,7 @@
 
 LineInput::LineInput(SpacialStructure* space)
 	: drawing(false), spacialStructure(space), volumePointCount(1000)
+    , finished(false)
 {
 }
 
@@ -19,14 +20,6 @@ void LineInput::update(float x, float y, bool isDown)
 {
 	if (!drawing && isDown)
 	{
-		if (lines.size() == 2)
-		{
-			lines.clear();
-			surface.clear();
-			surfaceIndices.clear();
-			volumePoints.clear();
-		}
-
 		lines.emplace_back();
 		lines.back().points.emplace_back(x, y, 0);
 		drawing = true;
@@ -34,7 +27,7 @@ void LineInput::update(float x, float y, bool isDown)
 	else if (drawing && !isDown)
 	{
 		drawing = false;
-		if (lines.size() == 2)
+		if (lines.size() > 0 && lines.size() % 2 == 0)
 		{
 			createSurface();
 			generateVolumePoints(volumePointCount);
@@ -56,6 +49,31 @@ void LineInput::update(float x, float y, bool isDown)
 void LineInput::setDensity(size_t density)
 {
 	volumePointCount = density;
+}
+
+void LineInput::setFinished(bool _finished)
+{
+    finished = _finished;
+}
+
+void LineInput::clear()
+{
+    finished = false;
+    lines.clear();
+    surface.clear();
+    surfaceNormal.clear();
+    surfaceIndices.clear();
+    volumePoints.clear();
+}
+
+bool LineInput::isFinished()
+{
+    return finished;
+}
+
+bool LineInput::hasBegun()
+{
+    return lines.size() > 0;
 }
 
 std::vector<Line>& LineInput::getLines()
@@ -115,8 +133,8 @@ void LineInput::createSurface()
 
 void LineInput::generateVolumePoints(size_t count)
 {
-	volumePoints.clear();
-	volumePoints.reserve(count);
+//	volumePoints.clear();
+	volumePoints.reserve(count + volumePoints.size());
 	if(spacialStructure) spacialStructure->clearAttractionNodes();
 
 	std::default_random_engine generator;
@@ -136,8 +154,10 @@ void LineInput::generateVolumePoints(size_t count)
 
 glm::vec3 LineInput::getVolumePoint(float u, float v, float w)
 {
-	auto u1 = lines[0].parameterize(u);
-	auto u2 = lines[1].parameterize(u);
+    size_t lastLine = lines.size() - 1;
+
+	auto u1 = lines[lastLine-1].parameterize(u);
+	auto u2 = lines[lastLine].parameterize(u);
 	auto mid = (u1 + u2)*0.5f;
 
 	float t;

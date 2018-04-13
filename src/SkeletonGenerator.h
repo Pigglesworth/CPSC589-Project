@@ -17,6 +17,7 @@ public:
 	void step();
 	bool hasStarted();
 	bool isFinished();
+    void forceFinished();
 	void clear();
 
 	void smoothAndUpdate();
@@ -24,6 +25,9 @@ public:
 	void setCullDistance(float d);
 	void setSearchDistance(float d);
 	void setNodeDistance(float d);
+
+    void generateMesh();
+
 
 	std::vector<glm::vec3>& getNodePositions();
 	std::vector<GLuint>& getNodeIndices();
@@ -39,8 +43,6 @@ private:
 	void addNode(glm::vec3 position, size_t parent);
 
 	void smooth();
-
-	void generateMesh();
 
 	struct Node
 	{

@@ -171,6 +171,11 @@ bool SkeletonGenerator::isFinished()
 	return hasStarted() && (activePoints <= attractionPoints.size() / 100 || stepCount > maxSteps || !nodeAdded);
 }
 
+void SkeletonGenerator::forceFinished()
+{
+    activePoints = 0;
+}
+
 void SkeletonGenerator::clear()
 {
 	stepCount = 0;
