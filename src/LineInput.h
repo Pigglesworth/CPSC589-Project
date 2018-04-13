@@ -58,7 +58,7 @@ public:
 
     std::vector<RevolutionSurface>& getSurfaces();
 
-	std::vector<glm::vec3>& getVolumePoints();
+	std::vector<std::vector<glm::vec3>>& getVolumePoints();
 
 private:
 	void createSurface();
@@ -72,9 +72,11 @@ private:
 	std::vector<Line> lines;
     std::vector<RevolutionSurface> surfaces;
 
-	std::vector<glm::vec3> volumePoints;
+	std::vector<std::vector<glm::vec3>> volumePoints;
 
 	size_t volumePointCount;
+    bool densityChanged;
+
 	SpacialStructure* spacialStructure;
 };
 

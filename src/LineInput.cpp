@@ -30,9 +30,15 @@ void LineInput::update(float x, float y, bool isDown)
 		if (lines.size() > 0 && lines.size() % 2 == 0)
 		{
 			createSurface();
-			generateVolumePoints(volumePointCount);
+            generateVolumePoints(volumePointCount);
 		}
 	}
+
+    if (!isFinished() && lines.size() > 1 && densityChanged)
+    {
+        generateVolumePoints(volumePointCount);
+    }
+
 
 
 	if (drawing)
@@ -44,10 +50,14 @@ void LineInput::update(float x, float y, bool isDown)
 		}
 	}
 
+    densityChanged = false;
 }
 
 void LineInput::setDensity(size_t density)
 {
+    if(density != volumePointCount)
+        densityChanged = true;
+
 	volumePointCount = density;
 }
 
@@ -85,7 +95,7 @@ std::vector<LineInput::RevolutionSurface>& LineInput::getSurfaces()
 }
 
 
-std::vector<glm::vec3>& LineInput::getVolumePoints()
+std::vector<std::vector<glm::vec3>>& LineInput::getVolumePoints()
 {
 	return volumePoints;
 }
@@ -93,8 +103,11 @@ std::vector<glm::vec3>& LineInput::getVolumePoints()
 
 void LineInput::createSurface()
 {
-    surfaces.emplace_back();
-    auto& newSurface = surfaces.back();
+    size_t surfaceIndex = lines.size() / 2 - 1;
+    if (surfaceIndex >= surfaces.size())
+        surfaces.resize(surfaceIndex + 1);
+
+    auto& newSurface = surfaces[surfaceIndex];
 
 	const size_t steps = 100;
 	const float inc = 1.f / (steps-1);
@@ -125,8 +138,13 @@ void LineInput::createSurface()
 
 void LineInput::generateVolumePoints(size_t count)
 {
-//	volumePoints.clear();
-	volumePoints.reserve(count + volumePoints.size());
+    size_t pointIndex = lines.size() / 2 - 1;
+    if (pointIndex  >= volumePoints.size())
+        volumePoints.resize(pointIndex + 1);
+
+    auto& pointList = volumePoints[pointIndex];
+    pointList.clear();
+	pointList.reserve(count + volumePoints.size());
 	if(spacialStructure) spacialStructure->clearAttractionNodes();
 
 	std::default_random_engine generator;
@@ -139,7 +157,7 @@ void LineInput::generateVolumePoints(size_t count)
 		float v = distribution(generator) * 2 * M_PI;
 		float w = std::sqrt(distribution(generator));
 
-		volumePoints.emplace_back(getVolumePoint(u, v, w));
+        pointList.emplace_back(getVolumePoint(u, v, w));
 	}
 }
 

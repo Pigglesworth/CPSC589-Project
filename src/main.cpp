@@ -115,7 +115,16 @@ int main()
 
 						if (mouseDown)
 						{
-							skeletal.begin(lineDrawer.getVolumePoints(), glm::vec3(mouse.first,mouse.second,0.f));
+                            std::vector<glm::vec3> allPointsList;
+                            for (auto& pointList : lineDrawer.getVolumePoints())
+                            {
+                                for (auto& p : pointList)
+                                {
+                                    allPointsList.emplace_back(p);
+                                }
+                            }
+
+							skeletal.begin(allPointsList, glm::vec3(mouse.first,mouse.second,0.f));
 							waitForPointPlacement = 2;
 						}
 					}
@@ -163,8 +172,10 @@ int main()
                     window.renderObject(surface.surface, surface.surfaceNormal, surface.surfaceIndices);
                 }
 
-
-                window.renderObject(lineDrawer.getVolumePoints(), glm::vec3(1.f, 0.f, 1.f), GL_POINTS);
+                for (auto& pointList : lineDrawer.getVolumePoints())
+                {
+                    window.renderObject(pointList, glm::vec3(1.f, 0.f, 1.f), GL_POINTS);
+                }
 
                 window.renderObject(skeletal.getNodePositions(), skeletal.getNodeIndices(), glm::vec3(0.f, 0.f, 1.f), GL_LINES);
             }
