@@ -5,6 +5,7 @@
 #include "LineInput.h"
 #include "SkeletonGenerator.h"
 #include "ObjExporter.h"
+#include "Slider.h"
 
 bool exportObj = true;
 bool smooth = false;
@@ -17,6 +18,11 @@ int main()
 	SkeletonGenerator skeletal(space);
 	ObjExporter objer;
 
+	Slider densitySlider(10.f,30000.f,glm::vec2(0.45f,0.85f));
+	Slider cullDistanceSlider(0.01f, 0.1f, glm::vec2(0.45f, 0.75f));
+	Slider searchDistanceSlider(0.005f, 0.2f, glm::vec2(0.45f, 0.65f));
+	Slider nodeDistanceSlider(0.005f, 0.1f, glm::vec2(0.45f, 0.55f));
+
 	int waitForPointPlacement = 0;
 
 
@@ -24,12 +30,30 @@ int main()
 	{
 		{
 			auto mouse = window.getMousePosition();
+			auto mouseScreen = window.getMouseScreenPosition();
+			auto mouseDown = window.getMouseDown();
 
-			if (waitForPointPlacement == 2 && !window.getMouseDown())
+			densitySlider.update(mouseDown, mouseScreen.first, mouseScreen.second);
+			cullDistanceSlider.update(mouseDown, mouseScreen.first, mouseScreen.second);
+			searchDistanceSlider.update(mouseDown, mouseScreen.first, mouseScreen.second);
+			nodeDistanceSlider.update(mouseDown, mouseScreen.first, mouseScreen.second);
+
+			if (densitySlider.isHeld() || cullDistanceSlider.isHeld() || nodeDistanceSlider.isHeld() || searchDistanceSlider.isHeld())
+				mouseDown = false;
+
+			lineDrawer.setDensity(densitySlider.getValue());
+			skeletal.setCullDistance(cullDistanceSlider.getValue());
+			skeletal.setSearchDistance(searchDistanceSlider.getValue());
+			skeletal.setNodeDistance(nodeDistanceSlider.getValue());
+
+
+
+
+			if (waitForPointPlacement == 2 && !mouseDown)
 				waitForPointPlacement = 0;
 
 			if(!waitForPointPlacement)
-				lineDrawer.update(mouse.first, mouse.second, window.getMouseDown());
+				lineDrawer.update(mouse.first, mouse.second, mouseDown);
 
 			auto& lines = lineDrawer.getLines();
 			for (auto& line : lines)
@@ -58,7 +82,7 @@ int main()
 					{
 						waitForPointPlacement = 1;
 
-						if (window.getMouseDown())
+						if (mouseDown)
 						{
 							skeletal.begin(lineDrawer.getVolumePoints(), glm::vec3(mouse.first,mouse.second,0.f));
 							waitForPointPlacement = 2;
@@ -103,6 +127,12 @@ int main()
 			}
 
 		}
+
+
+		densitySlider.render(window);
+		cullDistanceSlider.render(window);
+		searchDistanceSlider.render(window);
+		nodeDistanceSlider.render(window);
 
 		window.render();
 	}

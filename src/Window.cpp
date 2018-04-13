@@ -70,7 +70,7 @@ Window::~Window()
 
 
 void Window::renderObject
-	( std::vector<glm::vec3>& posList, glm::vec3 colour, GLenum type)
+	( std::vector<glm::vec3>& posList, glm::vec3 colour, GLenum type, bool screenSpace)
 {
 	if (!posList.size())
 		return;
@@ -88,6 +88,8 @@ void Window::renderObject
 
 
 	auto vp = makeVPMatrix();
+	if (screenSpace)
+		vp = glm::mat4();
 
 	standardShader->useShader
 	("view", vp, "colour", colour);
@@ -199,6 +201,11 @@ std::pair<float, float> Window::getMousePosition()
 	return std::make_pair(mouseX, mouseY);
 }
 
+std::pair<float, float> Window::getMouseScreenPosition()
+{
+	return std::make_pair(mouseScreenX, mouseScreenY);
+}
+
 bool Window::getMouseDown()
 {
 	return mouseIsDown;
@@ -284,6 +291,9 @@ void Window::handleMoveMouse(GLFWwindow * window, double x, double y)
 
 	mouseX = v.x;
 	mouseY = v.y;
+	mouseScreenX = (x / winWidth - 0.5f) * 2.f;
+	mouseScreenY = (y / winHeight - 0.5f) * -2.f;
+
 }
 
 void Window::handleMouseState(GLFWwindow * window, int button, int action, int mods)

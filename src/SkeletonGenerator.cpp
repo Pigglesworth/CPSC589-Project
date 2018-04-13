@@ -8,6 +8,7 @@
 
 SkeletonGenerator::SkeletonGenerator(SpacialStructure* space)
 	: activePoints(0), stepCount(0), spacialStructure(space)
+	, cullDistance(0.05f), searchDistance(0.1f), nodeDistance(0.04f)
 {
 }
 
@@ -37,10 +38,6 @@ void SkeletonGenerator::step()
 		return;
 
 	nodeAdded = false;
-
-	const float cullDistance = 0.05f;
-	const float searchDistance = 0.1f;
-	const float nodeDistance = 0.04f;
 
 	if (attractionPoints.size() < nodes.size());
 
@@ -117,6 +114,21 @@ void SkeletonGenerator::smoothAndUpdate()
 {
 	smooth();
 	generateMesh();
+}
+
+void SkeletonGenerator::setCullDistance(float d)
+{
+	cullDistance = d;
+}
+
+void SkeletonGenerator::setSearchDistance(float d)
+{
+	searchDistance = d;
+}
+
+void SkeletonGenerator::setNodeDistance(float d)
+{
+	nodeDistance = d;
 }
 
 void SkeletonGenerator::smooth()

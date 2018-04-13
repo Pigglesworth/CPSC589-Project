@@ -6,7 +6,7 @@
 #include <chrono>
 
 LineInput::LineInput(SpacialStructure* space)
-	: drawing(false), spacialStructure(space)
+	: drawing(false), spacialStructure(space), volumePointCount(1000)
 {
 }
 
@@ -37,7 +37,7 @@ void LineInput::update(float x, float y, bool isDown)
 		if (lines.size() == 2)
 		{
 			createSurface();
-			generateVolumePoints(30000);
+			generateVolumePoints(volumePointCount);
 		}
 	}
 
@@ -51,6 +51,11 @@ void LineInput::update(float x, float y, bool isDown)
 		}
 	}
 
+}
+
+void LineInput::setDensity(size_t density)
+{
+	volumePointCount = density;
 }
 
 std::vector<Line>& LineInput::getLines()

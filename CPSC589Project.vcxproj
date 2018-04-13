@@ -133,6 +133,7 @@
     <ClCompile Include="src\ObjExporter.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\SkeletonGenerator.cpp" />
+    <ClCompile Include="src\Slider.cpp" />
     <ClCompile Include="src\SpacialStructure.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
@@ -290,6 +291,7 @@
     <ClInclude Include="src\glm\vec3.hpp" />
     <ClInclude Include="src\glm\vec4.hpp" />
     <ClInclude Include="src\glm\vector_relational.hpp" />
+    <ClInclude Include="src\Slider.h" />
     <ClInclude Include="src\SpacialStructure.h" />
     <ClInclude Include="src\LineInput.h" />
     <ClInclude Include="src\ObjExporter.h" />
