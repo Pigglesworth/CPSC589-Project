@@ -48,9 +48,15 @@ public:
     bool hasBegun();
 
 	std::vector<Line>& getLines();
-	std::vector<glm::vec3>& getSurface();
-	std::vector<glm::vec3>& getSurfaceNormals();
-	std::vector<GLuint>& getSurfaceIndices();
+
+    struct RevolutionSurface
+    {
+        std::vector<glm::vec3> surface;
+        std::vector<glm::vec3> surfaceNormal;
+        std::vector<GLuint> surfaceIndices;
+    };
+
+    std::vector<RevolutionSurface>& getSurfaces();
 
 	std::vector<glm::vec3>& getVolumePoints();
 
@@ -64,9 +70,8 @@ private:
     bool finished;
 	bool drawing;
 	std::vector<Line> lines;
-	std::vector<glm::vec3> surface;
-	std::vector<glm::vec3> surfaceNormal;
-	std::vector<GLuint> surfaceIndices;
+    std::vector<RevolutionSurface> surfaces;
+
 	std::vector<glm::vec3> volumePoints;
 
 	size_t volumePointCount;

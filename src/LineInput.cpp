@@ -60,9 +60,7 @@ void LineInput::clear()
 {
     finished = false;
     lines.clear();
-    surface.clear();
-    surfaceNormal.clear();
-    surfaceIndices.clear();
+    surfaces.clear();
     volumePoints.clear();
 }
 
@@ -81,20 +79,11 @@ std::vector<Line>& LineInput::getLines()
 	return lines;
 }
 
-std::vector<glm::vec3>& LineInput::getSurface()
+std::vector<LineInput::RevolutionSurface>& LineInput::getSurfaces()
 {
-	return surface;
+	return surfaces;
 }
 
-std::vector<glm::vec3>& LineInput::getSurfaceNormals()
-{
-	return surfaceNormal;
-}
-
-std::vector<GLuint>& LineInput::getSurfaceIndices()
-{
-	return surfaceIndices;
-}
 
 std::vector<glm::vec3>& LineInput::getVolumePoints()
 {
@@ -104,6 +93,9 @@ std::vector<glm::vec3>& LineInput::getVolumePoints()
 
 void LineInput::createSurface()
 {
+    surfaces.emplace_back();
+    auto& newSurface = surfaces.back();
+
 	const size_t steps = 100;
 	const float inc = 1.f / (steps-1);
 
@@ -114,18 +106,18 @@ void LineInput::createSurface()
 			float u = ((float)ui) * inc;
 			float v = ((float)vi) * inc * 2 * M_PI;
 
-			surface.emplace_back(getVolumePoint(u, v, 1.0f));
-			surfaceNormal.emplace_back(getVolumeNormal(u, v, 1.0f));
+            newSurface.surface.emplace_back(getVolumePoint(u, v, 1.0f));
+            newSurface.surfaceNormal.emplace_back(getVolumeNormal(u, v, 1.0f));
 			
 			if (ui + 1 < steps && vi + 1 < steps)
 			{
-				surfaceIndices.emplace_back(ui*steps + vi);
-				surfaceIndices.emplace_back(ui*steps + vi + 1);
-				surfaceIndices.emplace_back((ui + 1)*steps + vi);
+                newSurface.surfaceIndices.emplace_back(ui*steps + vi);
+                newSurface.surfaceIndices.emplace_back(ui*steps + vi + 1);
+                newSurface.surfaceIndices.emplace_back((ui + 1)*steps + vi);
 
-				surfaceIndices.emplace_back(ui*steps + vi + 1);
-				surfaceIndices.emplace_back((ui + 1)*steps + vi + 1);
-				surfaceIndices.emplace_back((ui + 1)*steps + vi);
+                newSurface.surfaceIndices.emplace_back(ui*steps + vi + 1);
+                newSurface.surfaceIndices.emplace_back((ui + 1)*steps + vi + 1);
+                newSurface.surfaceIndices.emplace_back((ui + 1)*steps + vi);
 			}
 		}
 	}

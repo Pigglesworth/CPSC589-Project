@@ -158,7 +158,12 @@ int main()
             }
             else
             {
-                window.renderObject(lineDrawer.getSurface(), lineDrawer.getSurfaceNormals(), lineDrawer.getSurfaceIndices());
+                for (auto& surface : lineDrawer.getSurfaces())
+                {
+                    window.renderObject(surface.surface, surface.surfaceNormal, surface.surfaceIndices);
+                }
+
+
                 window.renderObject(lineDrawer.getVolumePoints(), glm::vec3(1.f, 0.f, 1.f), GL_POINTS);
 
                 window.renderObject(skeletal.getNodePositions(), skeletal.getNodeIndices(), glm::vec3(0.f, 0.f, 1.f), GL_LINES);
