@@ -25,7 +25,7 @@ void SkeletonGenerator::begin(std::vector<glm::vec3>& _points, glm::vec3 startin
 	{
 		attractionPoints.emplace_back(point, true);
 	}
-
+	finish = false;
 	activePoints = attractionPoints.size();
 	maxDepth = 0;
 	trunks = 0;
@@ -131,6 +131,28 @@ void SkeletonGenerator::setNodeDistance(float d)
 	nodeDistance = d;
 }
 
+float SkeletonGenerator::getSize(size_t i) 
+{
+	if (nodes[i].depth) return nodes[i].depth;
+	
+	if (!nodes[i].nodeChildren.size()) return 1;
+
+	for (size_t j = 0; j < nodes[i].nodeChildren.size(); ++j)
+	{
+		nodes[i].depth += getSize(nodes[i].nodeChildren[j]);
+	}
+
+	return nodes[i].depth;
+}
+
+void SkeletonGenerator::calculateDepths() 
+{
+	for (auto& node : nodes)
+		node.depth = 0;
+	getSize(0);
+}
+
+
 void SkeletonGenerator::smooth()
 {
 	SkeletonGenerator newNodes = *this;
@@ -138,25 +160,47 @@ void SkeletonGenerator::smooth()
 	for (size_t j = 0; j < nodes[0].nodeChildren.size(); ++j) 
 	{
 		newNodes.addNode((nodes[0].nodePoint + nodes[nodes[0].nodeChildren[j]].nodePoint) * .5f, 0);
+		int newNodeIndex = newNodes.getNodeCount() - 1;
+		int childIndex = nodes[0].nodeChildren[j];
+		newNodes.nodes[newNodeIndex].nodeChildren.emplace_back(childIndex);
 	}
 
 	for (size_t i = 1; i < nodes.size(); ++i)
 	{
 		newNodes.nodes[i].nodeChildren.clear();
-		newNodes.nodes[i].nodePoint = nodes[nodes[i].nodeParent].nodePoint * .25f + nodes[i].nodePoint * .75f;
-
-		for (size_t j = 0; j < nodes[i].nodeChildren.size(); ++j)
+		if (nodes[i].nodeChildren.size())
 		{
-			int childIndex = nodes[i].nodeChildren[j];	
-			newNodes.addNode(nodes[i].nodePoint * .75f + nodes[childIndex].nodePoint * .25f, i);
+			newNodes.nodes[i].nodePoint = nodes[nodes[i].nodeParent].nodePoint * .25f + nodes[i].nodePoint * .75f;
+			newNodes.nodePositions[i] = newNodes.nodes[i].nodePoint;
 
-			int parent = newNodes.getNodeCount() - 1;
-
-			for (size_t k = 0; k < nodes[childIndex].nodeChildren.size(); ++k)
+			for (size_t j = 0; j < nodes[i].nodeChildren.size(); ++j)
 			{
+				int childIndex = nodes[i].nodeChildren[j];
+				newNodes.addNode(nodes[i].nodePoint * .75f + nodes[childIndex].nodePoint * .25f, i);
+
+				int newNodeIndex = newNodes.getNodeCount() - 1;
+				newNodes.nodes[newNodeIndex].nodeChildren.emplace_back(childIndex);
 			}
 		}
+		else 
+		{
+			newNodes.nodes[i].nodePoint = nodes[nodes[i].nodeParent].nodePoint * .5f + nodes[i].nodePoint * .5f;
+			newNodes.nodePositions[i] = newNodes.nodes[i].nodePoint;
+
+			newNodes.addNode(nodes[i].nodePoint, i);
+		}
 	}
+
+	for (size_t i = 0; i < newNodes.nodes.size(); ++i)
+	{
+		newNodes.nodes[i].depth = 0.f;
+		for (size_t j = 0; j < newNodes.nodes[i].nodeChildren.size(); ++j)
+		{
+			newNodes.nodes[newNodes.nodes[i].nodeChildren[j]].nodeParent = i;
+
+		}
+	}
+	calculateDepths();
 
 	*this = newNodes;
 }
@@ -169,17 +213,18 @@ bool SkeletonGenerator::hasStarted()
 bool SkeletonGenerator::isFinished()
 {
 	const size_t maxSteps = -1;
-	return hasStarted() && (activePoints <= attractionPoints.size() / 100 || stepCount > maxSteps || !nodeAdded);
+	return hasStarted() && finish;
 }
 
 void SkeletonGenerator::forceFinished()
 {
-    activePoints = 0;
+	finish = true;
 }
 
 void SkeletonGenerator::clear()
 {
 	stepCount = 0;
+	finish = false;
 	attractionPoints.clear();
 	nodes.clear();
 	nodeIndices.clear();

@@ -37,6 +37,9 @@ public:
 	std::vector<glm::vec3>& getMeshNormals();
 	std::vector<GLuint>& getMeshIndices();
 private:
+	void calculateDepths();
+	float getSize(size_t i);
+	
 	std::vector<std::pair<glm::vec3, bool>> attractionPoints;
 	size_t activePoints, stepCount;
 
@@ -62,6 +65,8 @@ private:
 
 	int trunks;
 	bool nodeAdded;
+
+	bool finish;
 
 	std::vector<glm::vec3> meshPoints;
 	std::vector<glm::vec2> meshTexCoords;

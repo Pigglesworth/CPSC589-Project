@@ -337,7 +337,7 @@ void Window::handleKeyState(GLFWwindow * window, int key, int scancode, int acti
 		}
 		case GLFW_KEY_UP:
 		{
-			placeTrunk = true;
+			smooth = true;
 			break;
 		}
 
