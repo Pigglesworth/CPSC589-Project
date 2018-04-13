@@ -142,8 +142,9 @@ void SkeletonGenerator::smooth()
 
 	for (size_t i = 1; i < nodes.size(); ++i)
 	{
-		int parentIndex = nodes[i].nodeParent;
-		newNodes.nodes[i].nodePoint = nodes[parentIndex].nodePoint * .75f + nodes[i].nodePoint * .25f;
+		newNodes.nodes[i].nodeChildren.clear();
+		newNodes.nodes[i].nodePoint = nodes[nodes[i].nodeParent].nodePoint * .25f + nodes[i].nodePoint * .75f;
+
 		for (size_t j = 0; j < nodes[i].nodeChildren.size(); ++j)
 		{
 			int childIndex = nodes[i].nodeChildren[j];	
@@ -153,10 +154,10 @@ void SkeletonGenerator::smooth()
 
 			for (size_t k = 0; k < nodes[childIndex].nodeChildren.size(); ++k)
 			{
-				nodes[k].nodeParent = parent;
 			}
 		}
 	}
+
 	*this = newNodes;
 }
 
