@@ -131,16 +131,22 @@ void SkeletonGenerator::setNodeDistance(float d)
 	nodeDistance = d;
 }
 
-float SkeletonGenerator::getSize(size_t i) 
+float SkeletonGenerator::getDepth(size_t i) 
 {
 	if (nodes[i].depth) return nodes[i].depth;
 	
-	if (!nodes[i].nodeChildren.size()) return 1;
+	if (!nodes[i].nodeChildren.size()) 
+	{
+		nodes[i].depth = 1;
+		return nodes[i].depth;
+	}
 
 	for (size_t j = 0; j < nodes[i].nodeChildren.size(); ++j)
 	{
-		nodes[i].depth += getSize(nodes[i].nodeChildren[j]);
-	}
+		nodes[i].depth += getDepth(nodes[i].nodeChildren[j]);
+	} 
+
+	nodes[i].depth ++;
 
 	return nodes[i].depth;
 }
@@ -149,7 +155,33 @@ void SkeletonGenerator::calculateDepths()
 {
 	for (auto& node : nodes)
 		node.depth = 0;
+	getDepth(0);
+}
+
+void SkeletonGenerator::calculateSizes() 
+{
+	for (auto& node : nodes)
+		node.size = 0;
+
+	calculateDepths();
+
+	float initialSize = getDepth(0);
+	nodes[0].size = initialSize;
+
 	getSize(0);
+}
+
+float SkeletonGenerator::getSize(size_t i)
+{
+	if (nodes[i].size) return nodes[i].size;
+	
+	nodes[i].size = (getDepth(i)) / getDepth(nodes[i].nodeParent)* nodes[nodes[i].nodeParent].size;
+
+	for (int j : nodes[i].nodeChildren) {
+		getSize(j);
+	}
+
+	return nodes[i].size;
 }
 
 
@@ -157,6 +189,7 @@ void SkeletonGenerator::smooth()
 {
 	SkeletonGenerator newNodes = *this;
 
+	newNodes.nodes[0].nodeChildren.clear();
 	for (size_t j = 0; j < nodes[0].nodeChildren.size(); ++j) 
 	{
 		newNodes.addNode((nodes[0].nodePoint + nodes[nodes[0].nodeChildren[j]].nodePoint) * .5f, 0);
@@ -200,8 +233,6 @@ void SkeletonGenerator::smooth()
 
 		}
 	}
-	calculateDepths();
-
 	*this = newNodes;
 }
 
@@ -276,14 +307,12 @@ void SkeletonGenerator::addNode(glm::vec3 position, size_t parent)
 	newNode.nodeChildren;
 	if (parent >= index)
 	{
-		newNode.depth = 0;
 		newNode.trunk = true;
 		trunks++;
 	}
 	else
 	{
 		nodes[parent].nodeChildren.emplace_back(index);
-		newNode.depth = nodes[parent].depth + 1;
 		if (nodes[parent].trunk && nodes[parent].nodeChildren.size()) {
 			trunks++;
 			newNode.trunk = true;
@@ -309,6 +338,8 @@ void SkeletonGenerator::addNode(glm::vec3 position, size_t parent)
 
 void SkeletonGenerator::generateMesh()
 {
+	calculateSizes();
+
 	meshPoints.clear();
 	meshTexCoords.clear();
 	meshNormals.clear();
@@ -324,8 +355,8 @@ void SkeletonGenerator::createRevolution(size_t point1, size_t point2)
 	if (point1 == point2)
 		return;
 
-	float nodeDepth1 = (float)nodes[point1].depth;
-    float nodeDepth2 = (float)nodes[point2].depth;
+	float nodeDepth1 = ((float)getSize(point1) + 1) / getSize(0) * .1;
+	float nodeDepth2 = ((float)getSize(point2) + 1) / getSize(0) * .1;
 
 	glm::vec3 diff = glm::normalize(nodes[point1].nodePoint - nodes[point2].nodePoint);
 	glm::vec3 out = glm::normalize(glm::cross(diff, glm::vec3(diff.y, diff.x, diff.z)));
@@ -334,14 +365,14 @@ void SkeletonGenerator::createRevolution(size_t point1, size_t point2)
 	if (meshPoints.size())
 		indexOffset = meshPoints.size() - 1;
 
-	const size_t u_steps = 3;
+	const size_t u_steps = 4;
 	const size_t v_steps = 4;
 
 	for (size_t ui = 0; ui < u_steps; ui++)
 	{
 		const float u = ((float)ui) / (u_steps - 1);
 
-        float nodeDepth = (1 - u)*nodeDepth1 + u*nodeDepth2;
+		float nodeDepth = std::min(0.015f,(1 - u)*nodeDepth1 + u * nodeDepth2);
 
 		glm::vec3 linePoint = (1.f - u) * nodes[point1].nodePoint + u * nodes[point2].nodePoint;
 
@@ -353,7 +384,6 @@ void SkeletonGenerator::createRevolution(size_t point1, size_t point2)
 
 			glm::vec3 normal = glm::vec3(glm::vec4(out, 1.f) * glm::rotate(glm::mat4(1.f), v, diff));
 
- 
 			normal *= nodeDepth;
 
 			meshPoints.emplace_back(linePoint + normal);

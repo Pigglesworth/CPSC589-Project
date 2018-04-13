@@ -38,7 +38,10 @@ public:
 	std::vector<GLuint>& getMeshIndices();
 private:
 	void calculateDepths();
-	float getSize(size_t i);
+	float getDepth(size_t i);
+
+	void calculateSizes();
+	float getSize(size_t);
 	
 	std::vector<std::pair<glm::vec3, bool>> attractionPoints;
 	size_t activePoints, stepCount;
@@ -53,7 +56,8 @@ private:
 		glm::vec3 nodeWeight;
 		size_t nodeParent;
 		std::vector<size_t> nodeChildren;
-		size_t depth;
+		float depth;
+		float size;
 		bool trunk;
 	};
 
