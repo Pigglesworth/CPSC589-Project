@@ -8,14 +8,21 @@
 
 Shader::Shader(const std::string& v, const std::string& f)
 {
-    GLuint vShader = loadShader(v, GL_VERTEX_SHADER);
-    GLuint fShader = loadShader(f, GL_FRAGMENT_SHADER);
+	GLuint vShader = loadShader(v, GL_VERTEX_SHADER);
+	GLuint fShader = loadShader(f, GL_FRAGMENT_SHADER);
 
-    programID = glCreateProgram();
+	programID = glCreateProgram();
 
-    glAttachShader(programID, vShader);
-    glAttachShader(programID, fShader);
-    glLinkProgram(programID);
+	glAttachShader(programID, vShader);
+	glAttachShader(programID, fShader);
+	glLinkProgram(programID);
+
+	GLint success;
+	glGetProgramiv(programID, GL_LINK_STATUS, &success);
+	if (!success) {
+		std::cout << "Error in linking shader!" << std::endl;
+	}
+
 }
 
 
@@ -23,27 +30,34 @@ Shader::Shader(const std::string& v, const std::string& f)
 
 void Shader::setUniform(const char* name, glm::mat4 val)
 {
-    GLint loc = glGetUniformLocation(programID, name);
-    glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(val));
+	GLint loc = glGetUniformLocation(programID, name);
+	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(val));
 }
 
 void Shader::setUniform(const char* name, glm::vec4 val)
 {
-    GLint loc = glGetUniformLocation(programID, name);
-    glUniform4fv(loc, 1, glm::value_ptr(val));
+	GLint loc = glGetUniformLocation(programID, name);
+	glUniform4fv(loc, 1, glm::value_ptr(val));
 }
 
 void Shader::setUniform(const char* name, glm::vec3 val)
 {
-    GLint loc = glGetUniformLocation(programID, name);
-    glUniform3fv(loc, 1, glm::value_ptr(val));
+	GLint loc = glGetUniformLocation(programID, name);
+	glUniform3fv(loc, 1, glm::value_ptr(val));
 }
 
 void Shader::setUniform(const char* name, float val)
 {
-    GLint loc = glGetUniformLocation(programID, name);
-    glUniform1f(loc,val);
+	GLint loc = glGetUniformLocation(programID, name);
+	glUniform1f(loc,val);
 }
+
+void Shader::setUniform(const char* name, int val)
+{
+	GLint loc = glGetUniformLocation(programID, name);
+	glUniform1i(loc, val);
+}
+
 
 
 
@@ -51,34 +65,34 @@ void Shader::setUniformsHelper(){}
 
 GLuint Shader::loadShader(const std::string& filepath, GLenum shaderType)
 {
-    std::ifstream file;
-    file.open(filepath);
-    if(!file)
-        return -1;
+	std::ifstream file;
+	file.open(filepath);
+	if(!file)
+		return -1;
 
-    GLuint shader = glCreateShader(shaderType);
+	GLuint shader = glCreateShader(shaderType);
 
-    std::stringstream shaderSource;
-    shaderSource << file.rdbuf();
+	std::stringstream shaderSource;
+	shaderSource << file.rdbuf();
 
-    std::string shaderString = shaderSource.str();
-    GLint length = shaderString.size();
-    const char* shaderStringPart2 = shaderString.c_str();
+	std::string shaderString = shaderSource.str();
+	GLint length = shaderString.size();
+	const char* shaderStringPart2 = shaderString.c_str();
 
-    glShaderSource(shader, 1, &shaderStringPart2, &length);
-    glCompileShader(shader);
+	glShaderSource(shader, 1, &shaderStringPart2, &length);
+	glCompileShader(shader);
 
-    GLint success;
+	GLint success;
 
-    glGetObjectParameterivARB(shader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        char buffer[256];
-        glGetShaderInfoLog(shader,256,NULL,buffer);
+	glGetObjectParameterivARB(shader, GL_COMPILE_STATUS, &success);
+	if (!success)
+	{
+		char buffer[256];
+		glGetShaderInfoLog(shader,256,NULL,buffer);
 
-        std::cout << buffer << std::endl;
-    }        
+		std::cout << buffer << std::endl;
+	}        
 
 
-    return shader;
+	return shader;
 }

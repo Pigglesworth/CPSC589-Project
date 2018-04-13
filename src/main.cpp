@@ -1,11 +1,22 @@
 #include <gl\glew.h>
 #include <GLFW\glfw3.h>
+#include <iostream>
 
 #include "Window.h"
 #include "LineInput.h"
 #include "SkeletonGenerator.h"
 #include "ObjExporter.h"
 #include "Slider.h"
+
+
+
+extern "C"
+{
+#include "DensityImage.c"
+#include "CullImage.c"
+#include "SearchImage.c"
+#include "GrowthImage.c"
+}
 
 bool exportObj = true;
 bool smooth = false;
@@ -18,10 +29,15 @@ int main()
 	SkeletonGenerator skeletal(space);
 	ObjExporter objer;
 
-	Slider densitySlider(10.f,30000.f,glm::vec2(0.45f,0.85f));
-	Slider cullDistanceSlider(0.01f, 0.1f, glm::vec2(0.45f, 0.75f));
-	Slider searchDistanceSlider(0.005f, 0.2f, glm::vec2(0.45f, 0.65f));
-	Slider nodeDistanceSlider(0.005f, 0.1f, glm::vec2(0.45f, 0.55f));
+	Slider densitySlider(10.f,8000.f,glm::vec2(0.45f,0.8f));
+	Slider cullDistanceSlider(0.01f, 0.1f, glm::vec2(0.45f, 0.6f));
+	Slider searchDistanceSlider(0.005f, 0.2f, glm::vec2(0.45f, 0.4f));
+	Slider nodeDistanceSlider(0.005f, 0.1f, glm::vec2(0.45f, 0.2f));
+
+	Sprite densityText(density_image.width, density_image.height, density_image.bytes_per_pixel, &density_image.pixel_data[0]);
+	Sprite cullText(cull_image.width, cull_image.height, cull_image.bytes_per_pixel, &cull_image.pixel_data[0]);
+	Sprite searchText(search_image.width, search_image.height, search_image.bytes_per_pixel, &search_image.pixel_data[0]);
+	Sprite growthText(growth_image.width, growth_image.height, growth_image.bytes_per_pixel, &growth_image.pixel_data[0]);
 
 	int waitForPointPlacement = 0;
 
@@ -133,6 +149,12 @@ int main()
 		cullDistanceSlider.render(window);
 		searchDistanceSlider.render(window);
 		nodeDistanceSlider.render(window);
+
+
+		window.renderSprite(densityText, glm::vec2(0.4f, 2.2f), glm::vec2(.6f, 0.3f));
+		window.renderSprite(cullText, glm::vec2(0.4f, 1.7f), glm::vec2(.6f, 0.3f));
+		window.renderSprite(searchText, glm::vec2(0.4f, 1.2f), glm::vec2(.6f, 0.3f));
+		window.renderSprite(growthText, glm::vec2(0.4f, 0.7f), glm::vec2(.6f, 0.3f));
 
 		window.render();
 	}

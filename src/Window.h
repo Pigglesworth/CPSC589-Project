@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "Shader.h"
+#include "Sprite.h"
 
 class Window
 {
@@ -19,6 +20,8 @@ public:
 		( std::vector<glm::vec3>& posList, std::vector<GLuint>& indexList
 		, glm::vec3 colour = glm::vec3(1.f), GLenum type = GL_TRIANGLES);
 	void renderObject(std::vector<glm::vec3>& posList, std::vector<glm::vec3>& normalList, std::vector<GLuint>& indexList);
+
+	void renderSprite(Sprite& sprite, glm::vec2 pos, glm::vec2 size);
 
 	void render();
 	bool isOpen();
@@ -51,5 +54,6 @@ private:
 	GLFWwindow* window;
 	Shader* standardShader;
 	Shader* meshShader;
+	Shader* textureShader;
 };
 

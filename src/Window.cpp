@@ -58,6 +58,7 @@ Window::Window()
 
 	standardShader = new Shader("shaders/v.vert", "shaders/f.frag");
 	meshShader = new Shader("shaders/v2.vert", "shaders/f2.frag");
+	textureShader = new Shader("shaders/v3.vert", "shaders/f3.frag");
 }
 
 
@@ -102,6 +103,8 @@ void Window::renderObject
 
 	glDrawArrays(type, 0, posList.size());
 	glDisableVertexAttribArray(0);
+
+	glUseProgram(0);
 }
 
 void Window::renderObject
@@ -135,6 +138,8 @@ void Window::renderObject
 	glEnableVertexAttribArray(0);
 	glDrawElements(type, indexList.size(), GL_UNSIGNED_INT, &indexList.front());
 	glDisableVertexAttribArray(0);
+
+	glUseProgram(0);
 }
 
 void Window::renderObject(std::vector<glm::vec3>& posList, std::vector<glm::vec3>& normalList, std::vector<GLuint>& indexList)
@@ -174,6 +179,64 @@ void Window::renderObject(std::vector<glm::vec3>& posList, std::vector<glm::vec3
 
 	glDisableVertexAttribArray(0);
 	glDisableVertexAttribArray(2);
+
+	glUseProgram(0);
+
+
+}
+
+void Window::renderSprite(Sprite& sprite, glm::vec2 pos, glm::vec2 size)
+{
+	glDisable(GL_DEPTH_TEST);
+	glDisable(GL_CULL_FACE);
+
+	while (freeBuffers + 1 >= renderBuffers.size())
+	{
+		renderBuffers.emplace_back();
+		glGenBuffers(1, &renderBuffers.back());
+	}
+	size_t posBuffer = freeBuffers++;
+	size_t texBuffer = freeBuffers++;
+
+	glm::vec3 glPos[4];
+	glPos[0] = glm::vec3((glm::vec2(0.f, 0.f)+pos)*size,0.f);
+	glPos[1] = glm::vec3((glm::vec2(1.f, 0.f)+pos)*size,0.f);
+	glPos[2] = glm::vec3((glm::vec2(0.f, 1.f)+pos)*size,0.f);
+	glPos[3] = glm::vec3((glm::vec2(1.f, 1.f)+pos)*size,0.f);
+
+	glm::vec3 glTex[4] = { glm::vec3(0.f,0.f,0.f), glm::vec3(1.f,0.f,0.f), glm::vec3(0.f,1.f,0.f), glm::vec3(1.f,1.f,0.f) };
+
+
+	auto vp = glm::scale(glm::vec3(size,1.f));
+	vp = glm::translate(vp, glm::vec3(pos,0.f));
+
+
+	textureShader->useShader
+	("view", vp, "tex", 0);
+
+
+	glBindBuffer(GL_ARRAY_BUFFER, renderBuffers[posBuffer]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3)*4, &glPos[0], GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+	glBindBuffer(GL_ARRAY_BUFFER, renderBuffers[texBuffer]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(glm::vec3) * 4, &glTex[0], GL_DYNAMIC_DRAW);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+
+	glBindVertexArray(vao);
+	glEnableVertexAttribArray(0);
+	glEnableVertexAttribArray(2);
+
+	glActiveTexture(GL_TEXTURE0);
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, sprite.textureID);
+	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+
+	glDisableVertexAttribArray(0);
+	glDisableVertexAttribArray(2);
+
+	glDisable(GL_TEXTURE_2D);
+	glUseProgram(0);
 }
 
 
