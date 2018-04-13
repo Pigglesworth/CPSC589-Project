@@ -261,7 +261,8 @@ void SkeletonGenerator::createRevolution(size_t point1, size_t point2)
 	if (point1 == point2)
 		return;
 
-	size_t nodeDepth = nodes[point1].depth;
+	float nodeDepth1 = (float)nodes[point1].depth;
+    float nodeDepth2 = (float)nodes[point2].depth;
 
 	glm::vec3 diff = glm::normalize(nodes[point1].nodePoint - nodes[point2].nodePoint);
 	glm::vec3 out = glm::normalize(glm::cross(diff, glm::vec3(diff.y, diff.x, diff.z)));
@@ -276,6 +277,9 @@ void SkeletonGenerator::createRevolution(size_t point1, size_t point2)
 	for (size_t ui = 0; ui < u_steps; ui++)
 	{
 		const float u = ((float)ui) / (u_steps - 1);
+
+        volatile float nodeDepth = (1 - u)*nodeDepth1 + u*nodeDepth2;
+
 		glm::vec3 linePoint = (1.f - u) * nodes[point1].nodePoint + u * nodes[point2].nodePoint;
 
 		for (size_t vi = 0; vi < v_steps; vi++)
@@ -286,6 +290,7 @@ void SkeletonGenerator::createRevolution(size_t point1, size_t point2)
 
 			glm::vec3 normal = glm::vec3(glm::vec4(out, 1.f) * glm::rotate(glm::mat4(1.f), v, diff));
 
+ 
 			normal *= std::min(0.01f, 0.03f / nodeDepth);
 
 			meshPoints.emplace_back(linePoint + normal);
