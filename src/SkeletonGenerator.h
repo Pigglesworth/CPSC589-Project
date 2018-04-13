@@ -21,6 +21,10 @@ public:
 
 	void smoothAndUpdate();
 
+	void setCullDistance(float d);
+	void setSearchDistance(float d);
+	void setNodeDistance(float d);
+
 	std::vector<glm::vec3>& getNodePositions();
 	std::vector<GLuint>& getNodeIndices();
 
@@ -67,5 +71,9 @@ private:
 	int getNodeCount();
 
 	size_t maxDepth;
+
+	float cullDistance;
+	float searchDistance;
+	float nodeDistance;
 };
 

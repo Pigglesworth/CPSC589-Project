@@ -39,6 +39,7 @@ public:
 	~LineInput();
 
 	void update(float mouseX, float mouseY, bool mouseIsDown);
+	void setDensity(size_t density);
 
 	std::vector<Line>& getLines();
 	std::vector<glm::vec3>& getSurface();
@@ -61,6 +62,7 @@ private:
 	std::vector<GLuint> surfaceIndices;
 	std::vector<glm::vec3> volumePoints;
 
+	size_t volumePointCount;
 	SpacialStructure* spacialStructure;
 };
 
