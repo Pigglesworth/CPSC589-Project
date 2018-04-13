@@ -361,6 +361,9 @@ void Window::handleKeyState(GLFWwindow * window, int key, int scancode, int acti
 
 void Window::handleMoveMouse(GLFWwindow * window, double x, double y)
 {
+	auto posCopy = cameraPosition;
+
+	cameraPosition = glm::vec3(0, 0, 1);
 	auto inv = glm::inverse(makeVPMatrix());
 
 	glm::vec4 v(0.f, 0.f, 0.f, 1.f);
@@ -371,9 +374,11 @@ void Window::handleMoveMouse(GLFWwindow * window, double x, double y)
 
 	mouseX = v.x;
 	mouseY = v.y;
+
 	mouseScreenX = (x / winWidth - 0.5f) * 2.f;
 	mouseScreenY = (y / winHeight - 0.5f) * -2.f;
 
+	cameraPosition = posCopy;
 }
 
 void Window::handleMouseState(GLFWwindow * window, int button, int action, int mods)
