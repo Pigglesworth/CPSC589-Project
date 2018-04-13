@@ -41,12 +41,24 @@ public:
 	void update(float mouseX, float mouseY, bool mouseIsDown);
 	void setDensity(size_t density);
 
-	std::vector<Line>& getLines();
-	std::vector<glm::vec3>& getSurface();
-	std::vector<glm::vec3>& getSurfaceNormals();
-	std::vector<GLuint>& getSurfaceIndices();
+    void setFinished(bool finished);
+    void clear();
 
-	std::vector<glm::vec3>& getVolumePoints();
+    bool isFinished();
+    bool hasBegun();
+
+	std::vector<Line>& getLines();
+
+    struct RevolutionSurface
+    {
+        std::vector<glm::vec3> surface;
+        std::vector<glm::vec3> surfaceNormal;
+        std::vector<GLuint> surfaceIndices;
+    };
+
+    std::vector<RevolutionSurface>& getSurfaces();
+
+	std::vector<std::vector<glm::vec3>>& getVolumePoints();
 
 private:
 	void createSurface();
@@ -55,14 +67,16 @@ private:
 	glm::vec3 getVolumePoint(float u, float v, float w);
 	glm::vec3 getVolumeNormal(float u, float v, float w);
 
+    bool finished;
 	bool drawing;
 	std::vector<Line> lines;
-	std::vector<glm::vec3> surface;
-	std::vector<glm::vec3> surfaceNormal;
-	std::vector<GLuint> surfaceIndices;
-	std::vector<glm::vec3> volumePoints;
+    std::vector<RevolutionSurface> surfaces;
+
+	std::vector<std::vector<glm::vec3>> volumePoints;
 
 	size_t volumePointCount;
+    bool densityChanged;
+
 	SpacialStructure* spacialStructure;
 };
 

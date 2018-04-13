@@ -10,6 +10,8 @@ bool Window::doneInit = false;
 
 extern bool exportObj;
 extern bool smooth;
+extern bool placeTrunk;
+extern bool finishTree;
 
 Window::Window()
 	: mouseX(0.f), mouseY(0.f), mouseIsDown(false)
@@ -335,15 +337,33 @@ void Window::handleKeyState(GLFWwindow * window, int key, int scancode, int acti
 		}
 		case GLFW_KEY_UP:
 		{
-			smooth = true;
+			placeTrunk = true;
 			break;
 		}
+
+        case GLFW_KEY_ENTER:
+        {
+            placeTrunk = true;
+            break;
+        }
+
+        case GLFW_KEY_ESCAPE:
+        {
+            finishTree = true;
+            break;
+        }
+        
+
+
 		}
 	}
 }
 
 void Window::handleMoveMouse(GLFWwindow * window, double x, double y)
 {
+	auto posCopy = cameraPosition;
+
+	cameraPosition = glm::vec3(0, 0, 1);
 	auto inv = glm::inverse(makeVPMatrix());
 
 	glm::vec4 v(0.f, 0.f, 0.f, 1.f);
@@ -354,9 +374,11 @@ void Window::handleMoveMouse(GLFWwindow * window, double x, double y)
 
 	mouseX = v.x;
 	mouseY = v.y;
+
 	mouseScreenX = (x / winWidth - 0.5f) * 2.f;
 	mouseScreenY = (y / winHeight - 0.5f) * -2.f;
 
+	cameraPosition = posCopy;
 }
 
 void Window::handleMouseState(GLFWwindow * window, int button, int action, int mods)

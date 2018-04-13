@@ -20,6 +20,8 @@ extern "C"
 
 bool exportObj = true;
 bool smooth = false;
+bool placeTrunk = false;
+bool finishTree = false;
 
 int main()
 {
@@ -63,6 +65,18 @@ int main()
 			skeletal.setNodeDistance(nodeDistanceSlider.getValue());
 
 
+            if (placeTrunk)
+            {
+                lineDrawer.setFinished(true);
+                placeTrunk = false;
+            }
+
+            if (finishTree)
+            {
+                skeletal.forceFinished();
+                skeletal.generateMesh();
+                finishTree = false;
+            }
 
 
 			if (waitForPointPlacement == 2 && !mouseDown)
@@ -80,19 +94,20 @@ int main()
 
 			if (lines.size() > 1)
 			{
-				std::vector<glm::vec3> test;
-				for (float u = 0.f; u < 1.f; u += 0.01f)
-				{
-					auto v1 = lines[0].parameterize(u);
-					auto v2 = lines[1].parameterize(u);
-					test.emplace_back((v1 + v2)*0.5f);
-				}
+                for (size_t midpoints = 0; midpoints + 1 < lines.size(); midpoints += 2)
+                {
+                    std::vector<glm::vec3> midline;
+                    for (float u = 0.f; u < 1.f; u += 0.01f)
+                    {
+                        auto v1 = lines[midpoints].parameterize(u);
+                        auto v2 = lines[midpoints+1].parameterize(u);
+                        midline.emplace_back((v1 + v2)*0.5f);
+                    }
 
-				window.renderObject(test, glm::vec3(1.f, 0.f, 1.f), GL_LINE_STRIP);
-
-
+                    window.renderObject(midline, glm::vec3(1.f, 0.f, 1.f), GL_LINE_STRIP);
+                }
 		
-				if (lineDrawer.getVolumePoints().size())
+				if (lineDrawer.isFinished())
 				{
 					if (!skeletal.hasStarted())
 					{
@@ -100,7 +115,16 @@ int main()
 
 						if (mouseDown)
 						{
-							skeletal.begin(lineDrawer.getVolumePoints(), glm::vec3(mouse.first,mouse.second,0.f));
+                            std::vector<glm::vec3> allPointsList;
+                            for (auto& pointList : lineDrawer.getVolumePoints())
+                            {
+                                for (auto& p : pointList)
+                                {
+                                    allPointsList.emplace_back(p);
+                                }
+                            }
+
+							skeletal.begin(allPointsList, glm::vec3(mouse.first,mouse.second,0.f));
 							waitForPointPlacement = 2;
 						}
 					}
@@ -114,33 +138,47 @@ int main()
 					skeletal.clear();
 				}
 
-				if (skeletal.isFinished())
-				{
-					if (smooth)
-					{
-						skeletal.smoothAndUpdate();
-						smooth = false;
-					}
-
-					window.renderObject(skeletal.getMeshPoints(), skeletal.getMeshNormals(), skeletal.getMeshIndices());
-					if (!exportObj)
-					{
-						objer.exportMesh
-							( skeletal.getMeshPoints(), skeletal.getMeshTexCoords()
-							, skeletal.getMeshNormals(), skeletal.getMeshIndices());
-
-						exportObj = true;
-					}
-				}
-				else
-				{
-					window.renderObject(lineDrawer.getSurface(), lineDrawer.getSurfaceNormals(), lineDrawer.getSurfaceIndices());
-					window.renderObject(lineDrawer.getVolumePoints(), glm::vec3(1.f, 0.f, 1.f), GL_POINTS);
-
-					window.renderObject(skeletal.getNodePositions(), skeletal.getNodeIndices(), glm::vec3(0.f, 0.f, 1.f), GL_LINES);
-				}
-
 			}
+
+
+            if (lineDrawer.hasBegun() && !lineDrawer.isFinished())
+            {
+                skeletal.clear();
+            }
+
+            if (skeletal.isFinished())
+            {
+                lineDrawer.clear();
+                if (smooth)
+                {
+                    skeletal.smoothAndUpdate();
+                    smooth = false;
+                }
+
+                window.renderObject(skeletal.getMeshPoints(), skeletal.getMeshNormals(), skeletal.getMeshIndices());
+                if (!exportObj)
+                {
+                    objer.exportMesh
+                    (skeletal.getMeshPoints(), skeletal.getMeshTexCoords()
+                        , skeletal.getMeshNormals(), skeletal.getMeshIndices());
+
+                    exportObj = true;
+                }
+            }
+            else
+            {
+                for (auto& surface : lineDrawer.getSurfaces())
+                {
+                    window.renderObject(surface.surface, surface.surfaceNormal, surface.surfaceIndices);
+                }
+
+                for (auto& pointList : lineDrawer.getVolumePoints())
+                {
+                    window.renderObject(pointList, glm::vec3(1.f, 0.f, 1.f), GL_POINTS);
+                }
+
+                window.renderObject(skeletal.getNodePositions(), skeletal.getNodeIndices(), glm::vec3(0.f, 0.f, 1.f), GL_LINES);
+            }
 
 		}
 
