@@ -55,15 +55,15 @@ void Slider::render(Window& window)
 	rect.emplace_back(0.f, 1.f, 0.f);
 	rect.emplace_back(1.f, 0.f, 0.f);
 	rect.emplace_back(1.f, 1.f, 0.f);
-
-	auto transform = glm::scale(glm::mat4(), glm::vec3(0.5f, 0.05f,1.f));
+    
+	auto transform = glm::scale(glm::mat4(1.f), glm::vec3(0.5f, 0.05f,1.f));
 	for (auto& pt : rect)
 	{
 		pt = glm::vec3(glm::vec4(pt,1.f)*transform);
 		pt += glm::vec3(pos, 0.f);
 	}
 	window.renderObject(rect, glm::vec3(0.6f, 0.6f, 0.6f), GL_TRIANGLE_STRIP, true);
-
+    
 	rect.clear();
 
 
@@ -72,7 +72,7 @@ void Slider::render(Window& window)
 	rect.emplace_back(1.f, 0.f, 0.f);
 	rect.emplace_back(1.f, 1.f, 0.f);
 
-	transform = glm::scale(glm::mat4(), glm::vec3(0.05f, 0.05f, 1.f));
+	transform = glm::scale(glm::mat4(1.f), glm::vec3(0.05f, 0.05f, 1.f));
 	for (auto& pt : rect)
 	{
 		pt = glm::vec3(glm::vec4(pt, 1.f)*transform);
@@ -80,7 +80,7 @@ void Slider::render(Window& window)
 		pt.x += val*0.45f;
 	}
 	window.renderObject(rect, glm::vec3(1.f, 1.f, 1.f), GL_TRIANGLE_STRIP, true);
-
+    
 }
 
 

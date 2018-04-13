@@ -90,7 +90,7 @@ void Window::renderObject
 
 	auto vp = makeVPMatrix();
 	if (screenSpace)
-		vp = glm::mat4();
+		vp = glm::mat4(1.f);
 
 	standardShader->useShader
 	("view", vp, "colour", colour);
@@ -228,7 +228,7 @@ void Window::renderSprite(Sprite& sprite, glm::vec2 pos, glm::vec2 size)
 	glEnableVertexAttribArray(2);
 
 	glActiveTexture(GL_TEXTURE0);
-	glEnable(GL_TEXTURE_2D);
+    glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, sprite.textureID);
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
