@@ -344,6 +344,9 @@ void SkeletonGenerator::generateMesh()
 	meshTexCoords.clear();
 	meshNormals.clear();
 	meshIndices.clear();
+
+
+	indexOffsets.emplace_back(0);
 	for (size_t i = 0; i < nodes.size(); i++)
 	{
 		createRevolution(i, nodes[i].nodeParent);
@@ -355,18 +358,22 @@ void SkeletonGenerator::createRevolution(size_t point1, size_t point2)
 	if (point1 == point2)
 		return;
 
-	float nodeDepth1 = ((float)getSize(point1) + 1) / getSize(0) * .1;
-	float nodeDepth2 = ((float)getSize(point2) + 1) / getSize(0) * .1;
+	float nodeDepth1 = ((float)getDepth(point1) + 1) / getDepth(0) * .1;
+	float nodeDepth2 = ((float)getDepth(point2) + 1) / getDepth(0) * .1;
 
-	glm::vec3 diff = glm::normalize(nodes[point1].nodePoint - nodes[point2].nodePoint);
-	glm::vec3 out = glm::normalize(glm::cross(diff, glm::vec3(diff.y, diff.x, diff.z)));
+	glm::vec3 diff1 = glm::normalize(nodes[point1].nodePoint - nodes[point2].nodePoint);
+	glm::vec3 out1 = glm::normalize(glm::cross(diff1, glm::vec3(diff1.y, diff1.x, diff1.z)));
 
-	size_t indexOffset = 0;
-	if (meshPoints.size())
-		indexOffset = meshPoints.size() - 1;
+	
+	
+	glm::vec3 diff2 = glm::normalize(nodes[point2].nodePoint - nodes[nodes[point2].nodeParent].nodePoint);	
+	if (nodes[point2].nodePoint == nodes[nodes[point2].nodeParent].nodePoint)
+		diff2 = diff1;
+	
+	glm::vec3 out2 = glm::normalize(glm::cross(diff2, glm::vec3(diff2.y, diff2.x, diff2.z)));
 
-	const size_t u_steps = 4;
-	const size_t v_steps = 4;
+	const size_t u_steps = 6;
+	const size_t v_steps = 6;
 
 	for (size_t ui = 0; ui < u_steps; ui++)
 	{
@@ -375,6 +382,8 @@ void SkeletonGenerator::createRevolution(size_t point1, size_t point2)
 		float nodeDepth = std::min(0.015f,(1 - u)*nodeDepth1 + u * nodeDepth2);
 
 		glm::vec3 linePoint = (1.f - u) * nodes[point1].nodePoint + u * nodes[point2].nodePoint;
+		glm::vec3 out = glm::normalize((1.f - u) * out1 + u * out2);
+		glm::vec3 diff = glm::normalize((1.f - u) * diff1 + u * diff2);
 
 		for (size_t vi = 0; vi < v_steps; vi++)
 		{
