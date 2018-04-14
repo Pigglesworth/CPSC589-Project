@@ -345,8 +345,6 @@ void SkeletonGenerator::generateMesh()
 	meshNormals.clear();
 	meshIndices.clear();
 
-
-	indexOffsets.emplace_back(0);
 	for (size_t i = 0; i < nodes.size(); i++)
 	{
 		createRevolution(i, nodes[i].nodeParent);
@@ -371,6 +369,13 @@ void SkeletonGenerator::createRevolution(size_t point1, size_t point2)
 		diff2 = diff1;
 	
 	glm::vec3 out2 = glm::normalize(glm::cross(diff2, glm::vec3(diff2.y, diff2.x, diff2.z)));
+
+
+
+	size_t indexOffset = 0;
+	if (meshPoints.size())
+		indexOffset = meshPoints.size();
+
 
 	const size_t u_steps = 6;
 	const size_t v_steps = 6;
