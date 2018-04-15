@@ -17,7 +17,7 @@ public:
 	void step();
 	bool hasStarted();
 	bool isFinished();
-    void forceFinished();
+	void forceFinished();
 	void clear();
 
 	void smoothAndUpdate();
@@ -25,8 +25,10 @@ public:
 	void setCullDistance(float d);
 	void setSearchDistance(float d);
 	void setNodeDistance(float d);
+	void setMaxRadius(float d);
+	void setMinRadius(float d);
 
-    void generateMesh();
+	void generateMesh();
 
 
 	std::vector<glm::vec3>& getNodePositions();
@@ -86,5 +88,8 @@ private:
 	float cullDistance;
 	float searchDistance;
 	float nodeDistance;
+
+	float minRadius;
+	float maxRadius;
 };
 

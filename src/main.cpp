@@ -16,6 +16,8 @@ extern "C"
 #include "CullImage.c"
 #include "SearchImage.c"
 #include "GrowthImage.c"
+#include "MinImage.c"
+#include "MaxImage.c"
 }
 
 bool exportObj = true;
@@ -35,11 +37,15 @@ int main()
 	Slider cullDistanceSlider(0.01f, 0.1f, glm::vec2(0.45f, 0.6f));
 	Slider searchDistanceSlider(0.005f, 0.2f, glm::vec2(0.45f, 0.4f));
 	Slider nodeDistanceSlider(0.005f, 0.1f, glm::vec2(0.45f, 0.2f));
+	Slider maxRadiusSlider(0.005f, 0.04f, glm::vec2(0.45f, 0.0f));
+	Slider minRadiusSlider(0.f, 0.005f, glm::vec2(0.45f, -.2f));
 
 	Sprite densityText(density_image.width, density_image.height, density_image.bytes_per_pixel, &density_image.pixel_data[0]);
 	Sprite cullText(cull_image.width, cull_image.height, cull_image.bytes_per_pixel, &cull_image.pixel_data[0]);
 	Sprite searchText(search_image.width, search_image.height, search_image.bytes_per_pixel, &search_image.pixel_data[0]);
 	Sprite growthText(growth_image.width, growth_image.height, growth_image.bytes_per_pixel, &growth_image.pixel_data[0]);
+	Sprite maxText(max_image.width, max_image.height, max_image.bytes_per_pixel, &max_image.pixel_data[0]);
+	Sprite minText(min_image.width, min_image.height, min_image.bytes_per_pixel, &min_image.pixel_data[0]);
 
 	int waitForPointPlacement = 0;
 
@@ -55,28 +61,32 @@ int main()
 			cullDistanceSlider.update(mouseDown, mouseScreen.first, mouseScreen.second);
 			searchDistanceSlider.update(mouseDown, mouseScreen.first, mouseScreen.second);
 			nodeDistanceSlider.update(mouseDown, mouseScreen.first, mouseScreen.second);
+			maxRadiusSlider.update(mouseDown, mouseScreen.first, mouseScreen.second);
+			minRadiusSlider.update(mouseDown, mouseScreen.first, mouseScreen.second);
 
-			if (densitySlider.isHeld() || cullDistanceSlider.isHeld() || nodeDistanceSlider.isHeld() || searchDistanceSlider.isHeld())
+			if (densitySlider.isHeld() || cullDistanceSlider.isHeld() || nodeDistanceSlider.isHeld()
+				|| searchDistanceSlider.isHeld() || maxRadiusSlider.isHeld() || minRadiusSlider.isHeld())
 				mouseDown = false;
 
 			lineDrawer.setDensity(densitySlider.getValue());
 			skeletal.setCullDistance(cullDistanceSlider.getValue());
 			skeletal.setSearchDistance(searchDistanceSlider.getValue());
 			skeletal.setNodeDistance(nodeDistanceSlider.getValue());
+			skeletal.setMaxRadius(maxRadiusSlider.getValue());
+			skeletal.setMinRadius(minRadiusSlider.getValue());
 
+			if (placeTrunk)
+			{
+				lineDrawer.setFinished(true);
+				placeTrunk = false;
+			}
 
-            if (placeTrunk)
-            {
-                lineDrawer.setFinished(true);
-                placeTrunk = false;
-            }
-
-            if (finishTree)
-            {
-                skeletal.forceFinished();
-                skeletal.generateMesh();
-                finishTree = false;
-            }
+			if (finishTree)
+			{
+				skeletal.forceFinished();
+				skeletal.generateMesh();
+				finishTree = false;
+			}
 
 
 			if (waitForPointPlacement == 2 && !mouseDown)
@@ -94,18 +104,18 @@ int main()
 
 			if (lines.size() > 1)
 			{
-                for (size_t midpoints = 0; midpoints + 1 < lines.size(); midpoints += 2)
-                {
-                    std::vector<glm::vec3> midline;
-                    for (float u = 0.f; u < 1.f; u += 0.01f)
-                    {
-                        auto v1 = lines[midpoints].parameterize(u);
-                        auto v2 = lines[midpoints+1].parameterize(u);
-                        midline.emplace_back((v1 + v2)*0.5f);
-                    }
+				for (size_t midpoints = 0; midpoints + 1 < lines.size(); midpoints += 2)
+				{
+					std::vector<glm::vec3> midline;
+					for (float u = 0.f; u < 1.f; u += 0.01f)
+					{
+						auto v1 = lines[midpoints].parameterize(u);
+						auto v2 = lines[midpoints+1].parameterize(u);
+						midline.emplace_back((v1 + v2)*0.5f);
+					}
 
-                    window.renderObject(midline, glm::vec3(1.f, 0.f, 1.f), GL_LINE_STRIP);
-                }
+					window.renderObject(midline, glm::vec3(1.f, 0.f, 1.f), GL_LINE_STRIP);
+				}
 		
 				if (lineDrawer.isFinished())
 				{
@@ -115,14 +125,14 @@ int main()
 
 						if (mouseDown)
 						{
-                            std::vector<glm::vec3> allPointsList;
-                            for (auto& pointList : lineDrawer.getVolumePoints())
-                            {
-                                for (auto& p : pointList)
-                                {
-                                    allPointsList.emplace_back(p);
-                                }
-                            }
+							std::vector<glm::vec3> allPointsList;
+							for (auto& pointList : lineDrawer.getVolumePoints())
+							{
+								for (auto& p : pointList)
+								{
+									allPointsList.emplace_back(p);
+								}
+							}
 
 							skeletal.begin(allPointsList, glm::vec3(mouse.first,mouse.second,0.f));
 							waitForPointPlacement = 2;
@@ -141,44 +151,44 @@ int main()
 			}
 
 
-            if (lineDrawer.hasBegun() && !lineDrawer.isFinished())
-            {
-                skeletal.clear();
-            }
+			if (lineDrawer.hasBegun() && !lineDrawer.isFinished())
+			{
+				skeletal.clear();
+			}
 
-            if (skeletal.isFinished())
-            {
-                lineDrawer.clear();
-                if (smooth)
-                {
-                    skeletal.smoothAndUpdate();
-                    smooth = false;
-                }
+			if (skeletal.isFinished())
+			{
+				lineDrawer.clear();
+				if (smooth)
+				{
+					skeletal.smoothAndUpdate();
+					smooth = false;
+				}
 
-                window.renderObject(skeletal.getMeshPoints(), skeletal.getMeshNormals(), skeletal.getMeshIndices());
-                if (!exportObj)
-                {
-                    objer.exportMesh
-                    (skeletal.getMeshPoints(), skeletal.getMeshTexCoords()
-                        , skeletal.getMeshNormals(), skeletal.getMeshIndices());
+				window.renderObject(skeletal.getMeshPoints(), skeletal.getMeshNormals(), skeletal.getMeshIndices());
+				if (!exportObj)
+				{
+					objer.exportMesh
+					(skeletal.getMeshPoints(), skeletal.getMeshTexCoords()
+						, skeletal.getMeshNormals(), skeletal.getMeshIndices());
 
-                    exportObj = true;
-                }
-            }
-            else
-            {
-                for (auto& surface : lineDrawer.getSurfaces())
-                {
-                    window.renderObject(surface.surface, surface.surfaceNormal, surface.surfaceIndices);
-                }
+					exportObj = true;
+				}
+			}
+			else
+			{
+				for (auto& surface : lineDrawer.getSurfaces())
+				{
+					window.renderObject(surface.surface, surface.surfaceNormal, surface.surfaceIndices);
+				}
 
-                for (auto& pointList : lineDrawer.getVolumePoints())
-                {
-                    window.renderObject(pointList, glm::vec3(1.f, 0.f, 1.f), GL_POINTS);
-                }
+				for (auto& pointList : lineDrawer.getVolumePoints())
+				{
+					window.renderObject(pointList, glm::vec3(1.f, 0.f, 1.f), GL_POINTS);
+				}
 
-                window.renderObject(skeletal.getNodePositions(), skeletal.getNodeIndices(), glm::vec3(0.f, 0.f, 1.f), GL_LINES);
-            }
+				window.renderObject(skeletal.getNodePositions(), skeletal.getNodeIndices(), glm::vec3(0.f, 0.f, 1.f), GL_LINES);
+			}
 
 		}
 
@@ -187,12 +197,16 @@ int main()
 		cullDistanceSlider.render(window);
 		searchDistanceSlider.render(window);
 		nodeDistanceSlider.render(window);
+		maxRadiusSlider.render(window);
+		minRadiusSlider.render(window);
 
 
 		window.renderSprite(densityText, glm::vec2(0.4f, 2.2f), glm::vec2(.6f, 0.3f));
 		window.renderSprite(cullText, glm::vec2(0.4f, 1.7f), glm::vec2(.6f, 0.3f));
 		window.renderSprite(searchText, glm::vec2(0.4f, 1.2f), glm::vec2(.6f, 0.3f));
 		window.renderSprite(growthText, glm::vec2(0.4f, 0.7f), glm::vec2(.6f, 0.3f));
+		window.renderSprite(maxText, glm::vec2(0.4f, 0.2f), glm::vec2(.6f, 0.3f));
+		window.renderSprite(minText, glm::vec2(0.4f, -0.3f), glm::vec2(.6f, 0.3f));
 
 		window.render();
 	}

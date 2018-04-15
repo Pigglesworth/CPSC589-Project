@@ -9,6 +9,7 @@
 SkeletonGenerator::SkeletonGenerator(SpacialStructure* space)
 	: activePoints(0), stepCount(0), spacialStructure(space)
 	, cullDistance(0.05f), searchDistance(0.1f), nodeDistance(0.04f)
+	, minRadius(0.0f), maxRadius(0.1f)
 {
 }
 
@@ -129,6 +130,30 @@ void SkeletonGenerator::setSearchDistance(float d)
 void SkeletonGenerator::setNodeDistance(float d)
 {
 	nodeDistance = d;
+}
+
+void SkeletonGenerator::setMaxRadius(float d)
+{
+	bool changed = false;
+	if (d != maxRadius)
+		changed = true;
+
+	maxRadius = d;
+
+	if (changed)
+		generateMesh();
+}
+
+void SkeletonGenerator::setMinRadius(float d)
+{
+	bool changed = false;
+	if (d != maxRadius)
+		changed = true;
+
+	minRadius = d;
+
+	if (changed)
+		generateMesh();
 }
 
 float SkeletonGenerator::getDepth(size_t i) 
@@ -338,6 +363,9 @@ void SkeletonGenerator::addNode(glm::vec3 position, size_t parent)
 
 void SkeletonGenerator::generateMesh()
 {
+	if (nodes.size() == 0)
+		return;
+
 	calculateSizes();
 
 	meshPoints.clear();
@@ -371,7 +399,6 @@ void SkeletonGenerator::createRevolution(size_t point1, size_t point2)
 	glm::vec3 out2 = glm::normalize(glm::cross(diff2, glm::vec3(diff2.y, diff2.x, diff2.z)));
 
 
-
 	size_t indexOffset = 0;
 	if (meshPoints.size())
 		indexOffset = meshPoints.size();
@@ -384,7 +411,7 @@ void SkeletonGenerator::createRevolution(size_t point1, size_t point2)
 	{
 		const float u = ((float)ui) / (u_steps - 1);
 
-		float nodeDepth = std::min(0.015f,(1 - u)*nodeDepth1 + u * nodeDepth2);
+		float nodeDepth = std::max(minRadius,std::min(maxRadius,(1 - u)*nodeDepth1 + u * nodeDepth2));
 
 		glm::vec3 linePoint = (1.f - u) * nodes[point1].nodePoint + u * nodes[point2].nodePoint;
 		glm::vec3 out = glm::normalize((1.f - u) * out1 + u * out2);
