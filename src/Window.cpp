@@ -16,7 +16,7 @@ extern bool finishTree;
 Window::Window()
 	: mouseX(0.f), mouseY(0.f), mouseIsDown(false)
 	, cameraPosition(0,0,1)
-	, winWidth(1024), winHeight(768)
+	, winWidth(1498), winHeight(998-30)
 {
 	if (!doneInit)
 		doInit();
