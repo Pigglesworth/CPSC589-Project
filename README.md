@@ -31,3 +31,4 @@ If you have a different visual studios version, you may have to retarget the sol
 If you attempt to compile it with a different compiler, you will have to include the following libraries:
  - GLEW
  - GLFW3
+ - GLM
