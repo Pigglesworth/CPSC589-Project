@@ -22,3 +22,12 @@ Controls
  - Enter: Finish drawing lines, allow placement of starting point
  - Escape: Generate tree mesh
  - Control+S: Save tree to .obj file
+ 
+Compilation
+==============
+If you have visual studios 2017, this repository should work right out of the box.
+If you have a different visual studios version, you may have to retarget the solution.
+
+If you attempt to compile it with a different compiler, you will have to include the following libraries:
+ - GLEW
+ - GLFW3
