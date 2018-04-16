@@ -396,6 +396,9 @@ void Window::handleMouseState(GLFWwindow * window, int button, int action, int m
 
 void Window::handleWindowResize(GLFWwindow * window, int w, int h)
 {
+	if (w <= 0 || h <= 0)
+		return;
+
 	winWidth = w;
 	winHeight = h;
 	glfwGetFramebufferSize(window, &w, &h);
