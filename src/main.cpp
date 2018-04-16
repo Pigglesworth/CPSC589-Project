@@ -38,7 +38,7 @@ int main()
 	Slider searchDistanceSlider(0.005f, 0.2f, glm::vec2(0.45f, 0.4f));
 	Slider nodeDistanceSlider(0.005f, 0.1f, glm::vec2(0.45f, 0.2f));
 	Slider maxRadiusSlider(0.005f, 0.04f, glm::vec2(0.45f, 0.0f));
-	Slider minRadiusSlider(0.f, 0.005f, glm::vec2(0.45f, -.2f));
+	Slider minRadiusSlider(0.00001f, 0.05f, glm::vec2(0.45f, -.2f));
 
 	Sprite densityText(density_image.width, density_image.height, density_image.bytes_per_pixel, &density_image.pixel_data[0]);
 	Sprite cullText(cull_image.width, cull_image.height, cull_image.bytes_per_pixel, &cull_image.pixel_data[0]);
