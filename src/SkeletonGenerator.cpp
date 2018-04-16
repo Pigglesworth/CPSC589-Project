@@ -199,11 +199,17 @@ void SkeletonGenerator::calculateDepths()
 	for (auto& node : nodes)
 		node.depth = 0;
 
-	maxDepth = 100;
-	minDepth = maxDepth / getDepth(0);;
+	maxDepth = 100000;
+	minDepth = maxDepth / getDepth(0);
 
-	for (auto& node : nodes)
+	for (auto& node : nodes) 
+	{
 		node.depth *= minDepth;
+
+		node.depth = (node.depth - minDepth) / (maxDepth - minDepth);
+		node.depth += minRadius - (node.depth * minRadius);
+		node.depth *= maxRadius;
+	}
 }
 
 void SkeletonGenerator::calculateSizes() 
@@ -352,9 +358,6 @@ void SkeletonGenerator::addNode(glm::vec3 position, size_t parent)
 		}
 	}
 
-
-	if (newNode.depth > maxDepth) maxDepth = newNode.depth;
-
 	nodes.emplace_back(newNode);
 
 	nodeIndices.emplace_back(parent);
@@ -388,8 +391,8 @@ void SkeletonGenerator::createRevolution(size_t point1, size_t point2)
 	if (point1 == point2)
 		return;
 
-	float nodeDepth1 = ((float)getDepth(point1) - minDepth) / maxDepth;
-	float nodeDepth2 = ((float)getDepth(point2) - minDepth) / maxDepth;
+	float nodeDepth1 = getDepth(point1);
+	float nodeDepth2 = getDepth(point2);
 
 	glm::vec3 diff1 = glm::normalize(nodes[point1].nodePoint - nodes[point2].nodePoint);
 	glm::vec3 out1 = glm::normalize(glm::cross(diff1, glm::vec3(diff1.y, diff1.x, diff1.z)));
@@ -415,7 +418,7 @@ void SkeletonGenerator::createRevolution(size_t point1, size_t point2)
 	{
 		const float u = ((float)ui) / (u_steps - 1);
 
-		float nodeDepth = std::max(minRadius, maxRadius * ((1 - u)*nodeDepth1 + u * nodeDepth2));
+		float nodeDepth = (1 - u)*nodeDepth1 + u * nodeDepth2;
 
 		glm::vec3 linePoint = (1.f - u) * nodes[point1].nodePoint + u * nodes[point2].nodePoint;
 		glm::vec3 out = glm::normalize((1.f - u) * out1 + u * out2);
