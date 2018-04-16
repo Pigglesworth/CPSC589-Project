@@ -38,6 +38,7 @@ public:
 	std::vector<glm::vec2>& getMeshTexCoords();
 	std::vector<glm::vec3>& getMeshNormals();
 	std::vector<GLuint>& getMeshIndices();
+
 private:
 	void calculateDepths();
 	float getDepth(size_t i);
@@ -84,6 +85,7 @@ private:
 	int getNodeCount();
 
 	size_t maxDepth;
+	size_t minDepth;
 
 	float cullDistance;
 	float searchDistance;
